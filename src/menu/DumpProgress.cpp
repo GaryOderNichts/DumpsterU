@@ -107,7 +107,7 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
                     if (stopDump)
                     {
                         // Remove the not fully written file
-                        std::remove((target / npath).c_str());
+                        std::remove((target / npath).string().c_str());
                         break;
                     }
 				}

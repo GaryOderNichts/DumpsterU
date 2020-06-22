@@ -8,7 +8,7 @@ add_subdirectory(libs/wfslib/wfslib)
 find_package(PkgConfig)
 
 pkg_check_modules(GTKMM gtkmm-3.0)
-pkg_check_modules(LIBXML libxml++-5.0)
+pkg_check_modules(LIBXML libxml++-3.0)
 
 include(GResource)
 gresource(${CMAKE_CURRENT_SOURCE_DIR}/resources/gtk
@@ -40,16 +40,28 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17")
 
 #set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
-add_executable(wfstools 
+add_executable(${CMAKE_PROJECT_NAME}
                 ${SOURCES}
                 ${RESOURCE_FILE})
 
-target_link_libraries(wfstools
-    ${GTKMM_LIBRARIES}
-    ${LIBXML_LIBRARIES}
-    wfslib
-    cryptopp
-    boost_system
-    boost_filesystem
-    pthread
-)
+if (WIN32)
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        ${GTKMM_LIBRARIES}
+        ${LIBXML_LIBRARIES}
+        wfslib
+        cryptopp
+        boost_system-mt
+        boost_filesystem-mt
+        pthread
+    )
+else()
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        ${GTKMM_LIBRARIES}
+        ${LIBXML_LIBRARIES}
+        wfslib
+        cryptopp
+        boost_system
+        boost_filesystem
+        pthread
+    )
+endif()

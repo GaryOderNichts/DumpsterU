@@ -6,6 +6,9 @@
 std::vector<std::string> DiskUtils::getDisks()
 {
     std::vector<std::string> disks;
+#ifdef _WIN32
+    // TODO detect win drives
+#else
     for (const auto & entry : std::filesystem::directory_iterator("/sys/block"))
     {
         std::string filename = entry.path().filename();
@@ -15,6 +18,7 @@ std::vector<std::string> DiskUtils::getDisks()
             disks.push_back(filename);
         }
     }
+#endif
 
     return disks;
 }
