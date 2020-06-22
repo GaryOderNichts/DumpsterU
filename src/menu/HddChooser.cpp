@@ -49,10 +49,11 @@ void HddChooser::on_chooseHddOkButton_clicked()
 
     chooseHddWindow->close();
 
-    //Gtk::TreeModel::Row row = *(hdds->get_active());
-    //std::string id = row[columns.name];
+    Gtk::TreeModel::Row row = *(hdds->get_active());
+    Glib::ustring id = row[columns.name];
+    std::string devName = id;
 
-    list = new GameList(builder, otpPath, seepromPath, "/dev/sda");
+    list = new GameList(builder, otpPath, seepromPath, std::string("/dev/") + devName);
     chooseHddWindow->get_application()->add_window(*list->getWindow());
 }
 
