@@ -205,21 +205,108 @@
     <property name="name">progressWindow</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Dumping...</property>
+    <property name="resizable">False</property>
     <child>
-      <object class="GtkScrolledWindow" id="progressScrolledWindow">
-        <property name="width_request">800</property>
-        <property name="height_request">500</property>
+      <object class="GtkFixed">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">8</property>
+        <property name="margin_end">8</property>
+        <property name="margin_top">8</property>
+        <property name="margin_bottom">8</property>
         <child>
-          <object class="GtkTextView" id="progressConsole">
-            <property name="name">progressConsole</property>
+          <object class="GtkProgressBar" id="progressBar">
+            <property name="width_request">454</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="text" translatable="yes">0 / 0</property>
+            <property name="show_text">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="currentDumpFile">
+            <property name="width_request">-1</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Dumping hello.txt... </property>
+          </object>
+          <packing>
+            <property name="y">28</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="progressSize">
+            <property name="width_request">156</property>
+            <property name="height_request">20</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">0 / 1 MB</property>
+            <property name="xalign">1</property>
+          </object>
+          <packing>
+            <property name="x">298</property>
+            <property name="y">28</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="finishedLabel">
+            <property name="width_request">-1</property>
+            <property name="height_request">-1</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Finished dumping 0 file(s) to /path/to/output</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="foreground" value="#8a8ae2e23434"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="y">52</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="progressErrorCount">
+            <property name="width_request">-1</property>
+            <property name="height_request">-1</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">0 error(s) occured</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="foreground" value="#8a8ae2e23434"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="y">68</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="progressOk">
+            <property name="label" translatable="yes">Ok</property>
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="editable">False</property>
-            <property name="monospace">True</property>
+            <property name="receives_default">True</property>
           </object>
+          <packing>
+            <property name="x">354</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="progressCancel">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="width_request">100</property>
+            <property name="height_request">30</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="x">250</property>
+            <property name="y">100</property>
+          </packing>
         </child>
       </object>
     </child>

@@ -1,7 +1,7 @@
 #include "DumpProgress.h"
 
 #include <thread>
-#include <chrono>
+#include <boost/format.hpp>
 
 DumpProgress::DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
 {
@@ -11,20 +11,40 @@ DumpProgress::DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared
     builder->get_widget("progressWindow", dumpProgressWindow);
     dumpProgressWindow->show();
 
-    builder->get_widget("progressScrolledWindow", scrolledWindow);
+    builder->get_widget("progressBar", progressBar);
+    progressBar->set_fraction(0.0);
 
-    builder->get_widget("progressConsole", progressConsole);
-    progressConsole->get_buffer()->erase(progressConsole->get_buffer()->begin(), progressConsole->get_buffer()->end());
+    builder->get_widget("currentDumpFile", currentDumpFile);
+    builder->get_widget("progressSize", progressSize);
 
-    timeoutConn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &DumpProgress::consoleUpdate), 75);
+    builder->get_widget("finishedLabel", finishedLabel);
+    finishedLabel->set_visible(false);
+
+    builder->get_widget("progressErrorCount", errorLabel);
+    errorLabel->set_visible(false);
+
+    builder->get_widget("progressOk", buttonOk);
+    buttonOk->set_sensitive(false);
+    conns.push_back(buttonOk->signal_clicked().connect(sigc::mem_fun(*dumpProgressWindow, &Gtk::Window::hide)));
+
+    builder->get_widget("progressCancel", buttonCancel);
+    conns.push_back(buttonCancel->signal_clicked().connect(sigc::mem_fun(*this, &DumpProgress::cancelDump)));
+    buttonCancel->set_sensitive();
+
+    // update progress every 50ms
+    timeoutConn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &DumpProgress::updateProgress), 50);
 }
 
 DumpProgress::~DumpProgress()
 {
     timeoutConn.disconnect();
+    for (auto conn : conns)
+    {
+        conn.disconnect();
+    }
 }
 
-void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const std::shared_ptr<Directory>& dir, const boost::filesystem::path& path, int* outFilesAmount, int* outErrorAmount)
+void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const std::shared_ptr<Directory>& dir, const boost::filesystem::path& path)
 {
     if (stopDump)
     {
@@ -35,8 +55,8 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
     {
 		if (!boost::filesystem::create_directories(target / path))
         {
-			writeToConsole(std::string("Error: Cannot create directory: ") + (target / path).string(), false, ConsoleColor::Red);
-            (*outErrorAmount)++;
+			std::cerr << "Error: Cannot create directory: " << (target / path) << "\n";
+            currentErrorCount++;
 			return;
 		}
 	}
@@ -49,19 +69,25 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
                 break;
 
 			boost::filesystem::path npath = path / item->GetRealName();
-			writeToConsole(std::string("Dumping ") + npath.string());
 			if (item->IsDirectory())
             {
-                dumpDirectory(target, std::dynamic_pointer_cast<Directory>(item), npath, outFilesAmount, outErrorAmount);
+                dumpDirectory(target, std::dynamic_pointer_cast<Directory>(item), npath);
             }
 			else if (item->IsFile()) 
             {
 				auto file = std::dynamic_pointer_cast<File>(item);
+
 				std::ofstream output_file((target / npath).string(), std::ios::binary | std::ios::out);
+
 				size_t size = file->GetSize();
                 size_t to_read = size;
+                currentTotalFileSize = size;
+
 				File::stream stream(file);
 				std::vector<char> data(0x2000);
+
+                currentFileName = file->GetRealName();
+
                 bool err = false;
 				while (to_read > 0) 
                 {
@@ -69,18 +95,14 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
 					auto read = stream.gcount();
 					if (read <= 0) 
                     {
-						writeToConsole(std::string("Error: Failed to read ") + npath.string(), false, ConsoleColor::Red);
+						std::cerr << "Error: Failed to read " << npath << "\n";
                         err = true;
 						break;
 					}
 					output_file.write((char*)&*data.begin(), read);
 					to_read -= static_cast<size_t>(read);
 
-                    // don't update if we have to many pending messages or if the file isnt large enough
-                    if (pendingMessages.size() < 1000 && size > (1024 * 1024 * 20))
-                    {
-                        writeToConsole(item->GetRealName() + std::string(" ") + std::to_string(size - to_read) + std::string(" / ") + std::to_string(size), true);
-                    }
+                    currentFileSize = size - to_read;
 
                     if (stopDump)
                     {
@@ -90,15 +112,11 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
                     }
 				}
 
+                currentFileCount++;
                 if (err)
                 {
-                    (*outErrorAmount)++;
+                    currentErrorCount++;
                 }
-                else
-                {
-                    (*outFilesAmount)++;
-                }
-                
 
 				output_file.close();
 			}
@@ -106,69 +124,78 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
 	}
 	catch (Block::BadHash&) 
     {
-		writeToConsole(std::string("Error: Failed to dump folder ") + path.string(), false, ConsoleColor::Red);
-        (*outErrorAmount)++;
+		std::cerr << "Error: Failed to dump folder " << path << "\n";
+        currentErrorCount++;
 	}
-
-    consoleMutex.lock();
-    if (path.empty())
-        threadDone = true;
-    consoleMutex.unlock();
 }
 
-bool DumpProgress::consoleUpdate()
+void DumpProgress::countFiles(const std::shared_ptr<Directory>& dir)
 {
-    if (threadDone)
-    {
-        return false;
-    }
+    if (!dir)
+        return;
 
-    if (progressConsole)
+    for (auto item : *dir) 
     {
-        Glib::RefPtr<Gtk::TextBuffer> buf = progressConsole->get_buffer();
-
-        for (auto message : pendingMessages)
+        if (item->IsDirectory())
         {
-            if (message.cr && lastCr)
-            {
-                Gtk::TextBuffer::iterator it = buf->get_iter_at_line(buf->get_line_count() - 1);
-                it.backward_char();
-                buf->erase(it, buf->end());
-                it = buf->get_iter_at_line(buf->get_line_count() - 1);
-                buf->erase(it, buf->end());
-            }
-            lastCr = message.cr;
-
-            if (!threadDone)
-            {
-                buf->insert_markup(buf->end(), consoleColorMap[message.color] + message.message + std::string("</span>\n"));
-                buf->place_cursor(buf->end());
-            }
+            countFiles(std::dynamic_pointer_cast<Directory>(item));
         }
-        consoleMutex.lock();
-        pendingMessages.clear();
-        consoleMutex.unlock();
-
-        // scroll to bottom
-        Glib::RefPtr<Gtk::Adjustment> adj = scrolledWindow->get_vadjustment();
-        adj->set_value(adj->get_upper());
-
-        // // Update
-        // while (Gtk::Main::events_pending())
-        // {
-        //     Gtk::Main::iteration();
-        // }
+        else if (item->IsFile())
+        {
+            totalFileCount++;
+        }
     }
-
-    return !threadDone;
 }
 
-void DumpProgress::writeToConsole(const std::string& toWrite, bool cr, const ConsoleColor& color)
+bool DumpProgress::updateProgress()
 {
-    PendingMessage message = { toWrite, cr, color };
-    consoleMutex.lock();
-    pendingMessages.push_back(message);
-    consoleMutex.unlock();
+    progressBar->set_fraction((double) currentFileCount / totalFileCount);
+    progressBar->set_text(std::to_string(currentFileCount) + std::string(" / ") + std::to_string(totalFileCount));
+
+    currentDumpFile->set_text(std::string("Dumping ") + currentFileName.substr(0, 34) + std::string("..."));
+
+    if (currentFileSize >  1024 * 1024 * 5) // Display in mb if larger than 5mb
+    {
+        progressSize->set_text(boost::str(boost::format("%.2f") % (currentFileSize / 1024 / 1024)) + std::string(" / ") + boost::str(boost::format("%.2f") % (currentTotalFileSize / 1024 / 1024)) + std::string(" MB"));
+    }
+    else // display in kb
+    {
+        progressSize->set_text(boost::str(boost::format("%.2f") % (currentFileSize / 1024)) + std::string(" / ") + boost::str(boost::format("%.2f") % (currentTotalFileSize / 1024)) + std::string(" KB"));
+    }
+
+    if (dumpDone)
+    {
+        if (!stopDump)
+        {
+            Pango::AttrList att = finishedLabel->get_attributes();
+            Pango::Attribute green = Pango::Attribute::create_attr_foreground(0x8a8a, 0xe2e2, 0x3434);
+            att.insert(green);
+            finishedLabel->set_attributes(att);
+            finishedLabel->set_text(std::string("Finished dumping ") + std::to_string(currentFileCount) + std::string(" file(s) to ") + rawOutputPath.substr(0, 23) + std::string("..."));
+            finishedLabel->set_visible();
+
+            att = errorLabel->get_attributes();
+            Pango::Attribute red = Pango::Attribute::create_attr_foreground(0xEF00, 0x2900, 0x2900);
+            att.insert(currentErrorCount > 0 ? red : green);
+            errorLabel->set_attributes(att);
+            errorLabel->set_text(std::to_string(currentErrorCount) + std::string(" error(s) occured"));
+            errorLabel->set_visible();
+        }
+        else
+        {
+            Pango::AttrList att = finishedLabel->get_attributes();
+            Pango::Attribute yellow = Pango::Attribute::create_attr_foreground(0xED00, 0xD400, 0x2900);
+            att.insert(yellow);
+            finishedLabel->set_attributes(att);
+            finishedLabel->set_text(std::string("Dump cancelled"));
+            finishedLabel->set_visible();
+        }
+        
+        buttonOk->set_sensitive();
+        buttonCancel->set_sensitive(false);
+    }
+
+    return !dumpDone;//(currentFileCount / totalFileCount) > 0.99;
 }
 
 void DumpProgress::startDump(const std::string& dumpPath, const std::string& outputPath)
@@ -186,26 +213,19 @@ void DumpProgress::cancelDump()
 
 void DumpProgress::dumpThreadFunction(const std::string& dumpPath, const std::string& outputPath)
 {
+    rawOutputPath = outputPath;
+
     std::shared_ptr<Directory> dir = Wfs(device, key).GetDirectory(dumpPath);
     if (dir)
     {
-
-        int fileAmount = 0;
-        int errAmount = 0;
-        std::thread dumpThread(&DumpProgress::dumpDirectory, this, outputPath, dir, "", &fileAmount, &errAmount);
+        countFiles(dir);
+        std::thread dumpThread(&DumpProgress::dumpDirectory, this, outputPath, dir, "");
         dumpThread.join();
-
-        writeToConsole(std::string("Finished dumping ") + std::to_string(fileAmount) + std::string(" file(s) to ") + outputPath, false, ConsoleColor::Green);
-        writeToConsole(std::to_string(errAmount) + std::string(" error(s) occured"), false, errAmount > 0 ? ConsoleColor::Red : ConsoleColor::Green);
     }
     else
     {
-        writeToConsole(std::string("Error: Cannot open Game Directory ") + dumpPath, false, ConsoleColor::Red);
+        std::cerr << "Error: Cannot open Directory " << dumpPath << "\n";
     }
-
-    // // scroll to bottom
-    // Glib::RefPtr<Gtk::Adjustment> adj = scrolledWindow->get_vadjustment();
-    // adj->set_value(adj->get_upper());
 
     cancelMutex.lock();
     dumpDone = true;
