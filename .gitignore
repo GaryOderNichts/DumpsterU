@@ -1,0 +1,7 @@
+/.vscode
+/build
+
+# Glade temp files
+*.*~
+\#*#
+

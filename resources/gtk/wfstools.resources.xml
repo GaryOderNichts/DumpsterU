@@ -1,0 +1,8 @@
+ 
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/wfstools/">
+    <file>ui/custom.css</file>
+    <file preprocess="xml-stripblanks">ui/wfstools.ui</file>
+  </gresource>
+</gresources>
