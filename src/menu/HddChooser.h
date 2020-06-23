@@ -41,5 +41,5 @@ private:
     Gtk::FileChooserButton* otpButton = nullptr;
     Gtk::FileChooserButton* seepromButton = nullptr;
 
-    GameList* list;
+    GameList* list = nullptr;
 };
