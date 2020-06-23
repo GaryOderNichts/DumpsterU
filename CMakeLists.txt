@@ -38,7 +38,7 @@ file(GLOB SOURCES
 
 if (MINGW)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17 -static-libstdc++")
-elseif()
+else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17")
 endif()
 
@@ -58,7 +58,7 @@ if (MINGW)
         pthread
         Wbemuuid
     )
-elseif()
+else()
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${GTKMM_LIBRARIES}
         ${LIBXML_LIBRARIES}
