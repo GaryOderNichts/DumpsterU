@@ -10,6 +10,12 @@ int main(int argc, char** argv)
 {
 #ifdef _WIN32
     FreeConsole();
+    if (AttachConsole(ATTACH_PARENT_PROCESS))
+    {
+        AllocConsole();
+        freopen("CONOUT$", "w", stdout);
+        freopen("CONOUT$", "w", stderr);
+    }
 #endif
     Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "com.garyodernichts.wfstools");
     Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_resource("/wfstools/ui/wfstools.ui");
