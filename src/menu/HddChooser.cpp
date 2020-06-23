@@ -1,6 +1,8 @@
 #include "HddChooser.h"
 
 #include "utils/DiskUtils.h"
+#include "utils/TitleParser.h"
+#include <string>
 
 HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
 {
@@ -49,15 +51,53 @@ void HddChooser::on_chooseHddOkButton_clicked()
 
     Gtk::TreeModel::Row row = *(hdds->get_active());
     Glib::ustring id = row[columns.name];
-    std::string devName = id;
 
 #ifdef _WIN32
-    list = new GameList(builder, otpPath, seepromPath, devName);
+    std::string devName = id;
 #else
-    list = new GameList(builder, otpPath, seepromPath, std::string("/dev/") + devName);
+    std::string devName = std::string("/dev/") + id;
 #endif
-    chooseHddWindow->get_application()->add_window(*list->getWindow());
 
+    std::unique_ptr<OTP> otp;
+    std::unique_ptr<SEEPROM> seeprom;
+    try
+    {
+        otp.reset(OTP::LoadFromFile(otpPath));
+        seeprom.reset(SEEPROM::LoadFromFile(seepromPath));
+    }
+    catch(const std::exception& e)
+    {
+        Gtk::MessageDialog errDialog(*chooseHddWindow, "Error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, false);
+        errDialog.set_secondary_text(e.what());
+        errDialog.run();
+        return;
+    }
+
+    std::vector<uint8_t> key = seeprom->GetUSBKey(*otp);
+    std::shared_ptr<FileDevice>  device = std::make_shared<FileDevice>(devName);
+    try
+    {
+        Wfs::DetectDeviceSectorSizeAndCount(device, key);
+    }
+    catch(const std::exception& e)
+    {   
+        Gtk::MessageDialog errDialog(*chooseHddWindow, "Error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, false);
+        if (std::string(e.what()).compare("Unexpected WFS version (bad key?)") == 0)
+        {
+            errDialog.set_secondary_text("Not a WFS Device or bad key");
+        }
+        else
+        {
+            errDialog.set_secondary_text(e.what());
+        }
+        errDialog.run();
+        return;
+    }
+
+    std::vector<TitleParser::TitleInfo> infos = TitleParser::getTitleInfos(device, key);
+    list = new GameList(builder, infos, device, key);
+
+    chooseHddWindow->get_application()->add_window(*list->getWindow());
     chooseHddWindow->hide();
 }
 

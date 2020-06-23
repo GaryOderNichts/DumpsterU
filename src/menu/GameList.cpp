@@ -3,22 +3,15 @@
 #include "wfslib/WfsLib.h"
 #include <iostream>
 
-GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::string otppath, std::string seeprompath, std::string deviceid)
+GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
 {
     this->builder = builder;
-
-    std::unique_ptr<OTP> otp;
-    otp.reset(OTP::LoadFromFile(otppath));
-
-    std::unique_ptr<SEEPROM> seeprom;
-    seeprom.reset(SEEPROM::LoadFromFile(seeprompath));
-    key = seeprom->GetUSBKey(*otp);
+    this->device = device;
+    this->key = key;
+    this->infos = infos;
 
     builder->get_widget("gameListWindow", gameListWindow);
     gameListWindow->show();
-
-    device = std::make_shared<FileDevice>(deviceid);
-    Wfs::DetectDeviceSectorSizeAndCount(device, key);
 
     builder->get_widget("gameTree", treeView);
     treeView->signal_row_activated().connect(sigc::mem_fun(*this, &GameList::on_gamelist_row_activated));
@@ -26,7 +19,6 @@ GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::string otppath, std:
     Glib::RefPtr<Gtk::ListStore> treeModel = Gtk::ListStore::create(columns);
     treeView->set_model(treeModel);
 
-    infos = TitleParser::getTitleInfos(device, key);
     for (unsigned int i = 0; i < infos.size(); i++)
     {
         Gtk::TreeModel::Row row = *(treeModel->append());

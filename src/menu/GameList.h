@@ -28,7 +28,7 @@ public:
         Gtk::TreeModelColumn<Glib::ustring> name;
     };
 
-    GameList(Glib::RefPtr<Gtk::Builder> builder, std::string otppath, std::string seeprompath, std::string deviceid);
+    GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
     ~GameList();
 
     void on_gamelist_row_activated(const Gtk::TreePath& treePath, Gtk::TreeViewColumn* const& column);
