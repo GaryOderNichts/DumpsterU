@@ -92,7 +92,7 @@ void DumpWindow::on_savelist_row_activated(const Gtk::TreePath& treePath, Gtk::T
     Glib::RefPtr<Gtk::TreeSelection> selection = treeView->get_selection();
     Gtk::TreeModel::Row row = *selection->get_selected();
 
-    std::string outputPath = outputChooser->get_current_folder();
+    std::string outputPath = outputChooser->get_filename();
     if (!additionalInfo.savePath.empty() && !outputPath.empty())
     {
         boost::filesystem::path fullOutputPath = boost::filesystem::path(outputPath) / boost::filesystem::path(additionalInfo.shortTid) / boost::filesystem::path("saves") / boost::filesystem::path(additionalInfo.users[row[columns.index]]);
@@ -111,7 +111,7 @@ void DumpWindow::on_savelist_row_activated(const Gtk::TreePath& treePath, Gtk::T
 
 void DumpWindow::on_dumpGameButton_click()
 {
-    std::string outputPath = outputChooser->get_current_folder();
+    std::string outputPath = outputChooser->get_filename();
     if (!outputPath.empty())
     {
         boost::filesystem::path fullOutputPath = boost::filesystem::path(outputPath) / boost::filesystem::path(additionalInfo.shortTid) / boost::filesystem::path("game");
@@ -129,7 +129,7 @@ void DumpWindow::on_dumpGameButton_click()
 
 void DumpWindow::on_dumpUpdateButton_click()
 {
-    std::string outputPath = outputChooser->get_current_folder();
+    std::string outputPath = outputChooser->get_filename();
     if (!outputPath.empty() && !additionalInfo.updatePath.empty())
     {
         boost::filesystem::path fullOutputPath = boost::filesystem::path(outputPath) / boost::filesystem::path(additionalInfo.shortTid) / boost::filesystem::path("update");
@@ -147,7 +147,7 @@ void DumpWindow::on_dumpUpdateButton_click()
 
 void DumpWindow::on_dumpDlcButton_click()
 {
-    std::string outputPath = outputChooser->get_current_folder();
+    std::string outputPath = outputChooser->get_filename();
     if (!outputPath.empty() && !additionalInfo.dlcPath.empty())
     {
         boost::filesystem::path fullOutputPath = boost::filesystem::path(outputPath) / boost::filesystem::path(additionalInfo.shortTid) / boost::filesystem::path("dlc");
