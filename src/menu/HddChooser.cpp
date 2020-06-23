@@ -47,14 +47,18 @@ void HddChooser::on_chooseHddOkButton_clicked()
         return;
     }
 
-    chooseHddWindow->close();
-
     Gtk::TreeModel::Row row = *(hdds->get_active());
     Glib::ustring id = row[columns.name];
     std::string devName = id;
 
+#ifdef _WIN32
+    list = new GameList(builder, otpPath, seepromPath, devName);
+#else
     list = new GameList(builder, otpPath, seepromPath, std::string("/dev/") + devName);
+#endif
     chooseHddWindow->get_application()->add_window(*list->getWindow());
+
+    chooseHddWindow->hide();
 }
 
 void HddChooser::on_chooseHddRefreshButton_clicked()

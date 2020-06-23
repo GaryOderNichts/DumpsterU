@@ -47,13 +47,25 @@ endif()
 add_executable(${CMAKE_PROJECT_NAME}
                 ${SOURCES}
                 ${RESOURCE_FILE})
-
-target_link_libraries(${CMAKE_PROJECT_NAME}
-    ${GTKMM_LIBRARIES}
-    ${LIBXML_LIBRARIES}
-    wfslib
-    cryptopp
-    boost_system
-    boost_filesystem
-    pthread
-)
+if (MINGW)
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        ${GTKMM_LIBRARIES}
+        ${LIBXML_LIBRARIES}
+        wfslib
+        cryptopp
+        boost_system
+        boost_filesystem
+        pthread
+        Wbemuuid
+    )
+elseif()
+    target_link_libraries(${CMAKE_PROJECT_NAME}
+        ${GTKMM_LIBRARIES}
+        ${LIBXML_LIBRARIES}
+        wfslib
+        cryptopp
+        boost_system
+        boost_filesystem
+        pthread
+    )
+endif()
