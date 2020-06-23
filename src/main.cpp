@@ -2,8 +2,15 @@
 
 #include "menu/HddChooser.h"
 
+#ifdef _WIN32
+    #include <windows.h>
+#endif
+
 int main(int argc, char** argv)
 {
+#ifdef _WIN32
+    FreeConsole();
+#endif
     Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "com.garyodernichts.wfstools");
     Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_resource("/wfstools/ui/wfstools.ui");
 
