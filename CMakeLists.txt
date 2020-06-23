@@ -36,7 +36,11 @@ file(GLOB SOURCES
     src/utils/*.cpp
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17")
+if (MINGW)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17 -static-libstdc++")
+elseif()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17")
+endif()
 
 #set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -44,24 +48,12 @@ add_executable(${CMAKE_PROJECT_NAME}
                 ${SOURCES}
                 ${RESOURCE_FILE})
 
-if (WIN32)
-    target_link_libraries(${CMAKE_PROJECT_NAME}
-        ${GTKMM_LIBRARIES}
-        ${LIBXML_LIBRARIES}
-        wfslib
-        cryptopp
-        boost_system-mt
-        boost_filesystem-mt
-        pthread
-    )
-else()
-    target_link_libraries(${CMAKE_PROJECT_NAME}
-        ${GTKMM_LIBRARIES}
-        ${LIBXML_LIBRARIES}
-        wfslib
-        cryptopp
-        boost_system
-        boost_filesystem
-        pthread
-    )
-endif()
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    ${GTKMM_LIBRARIES}
+    ${LIBXML_LIBRARIES}
+    wfslib
+    cryptopp
+    boost_system
+    boost_filesystem
+    pthread
+)
