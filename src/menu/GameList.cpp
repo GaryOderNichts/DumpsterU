@@ -59,6 +59,7 @@ void GameList::on_gamelist_row_activated(const Gtk::TreePath& treePath, Gtk::Tre
     gameListWindow->get_application()->add_window(*dumpWindow->getWindow());
     dumpWindowConn = dumpWindow->getWindow()->signal_hide().connect(sigc::mem_fun(*this, &GameList::on_dumpWindow_closed));
     dumpWindow->getWindow()->set_transient_for(*gameListWindow);
+    dumpWindow->getWindow()->set_modal(true);
     gameListWindow->set_sensitive(false);
     deleteConn = gameListWindow->signal_delete_event().connect(sigc::mem_fun(*this, &GameList::on_gamelist_delete_event));
 }
@@ -67,6 +68,7 @@ void GameList::on_dumpWindow_closed()
 {
     dumpWindowConn.disconnect();
     deleteConn.disconnect();
+    dumpWindow->getWindow()->set_modal(false);
     delete dumpWindow;
     dumpWindow = nullptr;
 

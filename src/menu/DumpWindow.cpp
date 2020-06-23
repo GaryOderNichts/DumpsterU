@@ -101,6 +101,7 @@ void DumpWindow::on_savelist_row_activated(const Gtk::TreePath& treePath, Gtk::T
         progressWindow = new DumpProgress(builder, device, key);
         progressWindowConn = progressWindow->getWindow()->signal_hide().connect(sigc::mem_fun(*this, &DumpWindow::on_progressWindow_closed));
         progressWindow->getWindow()->set_transient_for(*dumpWindow);
+        progressWindow->getWindow()->set_modal(true);
         dumpWindow->set_sensitive(false);
 
         dumpWindowDeleteConn = dumpWindow->signal_delete_event().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpWindow_delete_event));
@@ -119,6 +120,7 @@ void DumpWindow::on_dumpGameButton_click()
         progressWindow = new DumpProgress(builder, device, key);
         progressWindowConn = progressWindow->getWindow()->signal_hide().connect(sigc::mem_fun(*this, &DumpWindow::on_progressWindow_closed));
         progressWindow->getWindow()->set_transient_for(*dumpWindow);
+        progressWindow->getWindow()->set_modal(true);
         dumpWindow->set_sensitive(false);
 
         dumpWindowDeleteConn = dumpWindow->signal_delete_event().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpWindow_delete_event));
@@ -137,6 +139,7 @@ void DumpWindow::on_dumpUpdateButton_click()
         progressWindow = new DumpProgress(builder, device, key);
         progressWindowConn = progressWindow->getWindow()->signal_hide().connect(sigc::mem_fun(*this, &DumpWindow::on_progressWindow_closed));
         progressWindow->getWindow()->set_transient_for(*dumpWindow);
+        progressWindow->getWindow()->set_modal(true);
         dumpWindow->set_sensitive(false);
 
         dumpWindowDeleteConn = dumpWindow->signal_delete_event().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpWindow_delete_event));
@@ -155,6 +158,7 @@ void DumpWindow::on_dumpDlcButton_click()
         progressWindow = new DumpProgress(builder, device, key);
         progressWindowConn = progressWindow->getWindow()->signal_hide().connect(sigc::mem_fun(*this, &DumpWindow::on_progressWindow_closed));
         progressWindow->getWindow()->set_transient_for(*dumpWindow);
+        progressWindow->getWindow()->set_modal(true);
         dumpWindow->set_sensitive(false);
 
         dumpWindowDeleteConn = dumpWindow->signal_delete_event().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpWindow_delete_event));
@@ -170,6 +174,8 @@ void DumpWindow::on_progressWindow_closed()
     
     dumpWindowDeleteConn.disconnect();
     progressWindowConn.disconnect();
+
+    progressWindow->getWindow()->set_modal(false);
 
     delete progressWindow;
     progressWindow = nullptr;
