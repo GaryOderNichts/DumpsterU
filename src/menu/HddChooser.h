@@ -3,6 +3,7 @@
 #include <gtkmm.h>
 
 #include "GameList.h"
+#include "utils/DiskUtils.h"
 
 class HddChooser
 {
@@ -12,10 +13,12 @@ public:
     public:
         HddModelColumns() 
         { 
+            add(index);
             add(name);
             add(size);
         }
 
+        Gtk::TreeModelColumn<int> index;
         Gtk::TreeModelColumn<Glib::ustring> name;
         Gtk::TreeModelColumn<Glib::ustring> size;
     };
@@ -38,6 +41,7 @@ private:
     Gtk::ComboBox* hdds = nullptr;
     HddModelColumns columns;
     Glib::RefPtr<Gtk::ListStore> treeModel;
+    std::vector<DiskUtils::Disk> disks;
 
     Gtk::FileChooserButton* otpButton = nullptr;
     Gtk::FileChooserButton* seepromButton = nullptr;

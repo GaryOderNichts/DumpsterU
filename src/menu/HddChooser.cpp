@@ -1,6 +1,5 @@
 #include "HddChooser.h"
 
-#include "utils/DiskUtils.h"
 #include "utils/TitleParser.h"
 #include <string>
 
@@ -54,13 +53,7 @@ void HddChooser::on_chooseHddOkButton_clicked()
     }
 
     Gtk::TreeModel::Row row = *(hdds->get_active());
-    Glib::ustring id = row[columns.name];
-
-#ifdef _WIN32
-    std::string devName = id;
-#else
-    std::string devName = std::string("/dev/") + id;
-#endif
+    DiskUtils::Disk disk = disks[row[columns.index]];
 
     std::unique_ptr<OTP> otp;
     std::unique_ptr<SEEPROM> seeprom;
@@ -78,7 +71,7 @@ void HddChooser::on_chooseHddOkButton_clicked()
     }
 
     std::vector<uint8_t> key = seeprom->GetUSBKey(*otp);
-    std::shared_ptr<FileDevice>  device = std::make_shared<FileDevice>(devName);
+    std::shared_ptr<FileDevice>  device = std::make_shared<FileDevice>(disk.deviceId);
     try
     {
         Wfs::DetectDeviceSectorSizeAndCount(device, key);
@@ -109,11 +102,13 @@ void HddChooser::on_chooseHddRefreshButton_clicked()
 {
     treeModel->clear();
 
-    std::vector<std::string> disks = DiskUtils::getDisks();
+    disks = DiskUtils::getDisks();
     for (unsigned int i = 0; i < disks.size(); i++)
     {
         Gtk::TreeModel::Row row = *(treeModel->append());
-        row[columns.name] = disks[i];
+        row[columns.index] = i;
+        row[columns.name] = disks[i].name;
+        row[columns.size] = disks[i].size;
 
         // set the first mount active
         if (i == 0)

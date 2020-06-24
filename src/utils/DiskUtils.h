@@ -6,5 +6,12 @@
 class DiskUtils
 {
 public:
-    static std::vector<std::string> getDisks();
+    struct Disk
+    {
+        std::string deviceId;
+        std::string name;
+        std::string size;
+    };
+
+    static std::vector<DiskUtils::Disk> getDisks();
 };

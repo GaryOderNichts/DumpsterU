@@ -12,9 +12,9 @@
     #include <codecvt>
 #endif
 
-std::vector<std::string> DiskUtils::getDisks()
+std::vector<DiskUtils::Disk> DiskUtils::getDisks()
 {
-    std::vector<std::string> disks;
+    std::vector<Disk> disks;
 #ifdef _WIN32
     HRESULT hres;
     hres =  CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -69,7 +69,10 @@ std::vector<std::string> DiskUtils::getDisks()
 
         if (filename.find("loop", 0) == std::string::npos)
         {
-            disks.push_back(filename);
+            Disk disk;
+            disk.name = filename;
+            disk.deviceId = std::string("/dev/") + filename;
+            disks.push_back(disk);
         }
     }
 #endif
