@@ -42,14 +42,20 @@ DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::Ti
     treeView->set_search_column(-1);
     connections.push_back(treeView->signal_row_activated().connect(sigc::mem_fun(*this, &DumpWindow::on_savelist_row_activated)));
 
+    Gtk::Label* versionLabel = nullptr;
+    builder->get_widget("dumpWindowVersionLabel", versionLabel);
+
     additionalInfo = TitleParser::getAdditionalInfo(info.titleId, device, key);
 
     if (additionalInfo.updatePath.empty())
     {
+        versionLabel->set_text("");
         dumpUpdateButton->set_sensitive(false);
     }
     else
     {
+        versionLabel->set_text(std::string("Version: ") + additionalInfo.updateVersion);
+
         dumpUpdateButton->set_sensitive(true);
     }
 
