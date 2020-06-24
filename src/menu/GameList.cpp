@@ -13,6 +13,10 @@ GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::
     builder->get_widget("gameListWindow", gameListWindow);
     gameListWindow->show();
 
+    Gtk::ImageMenuItem* aboutItem = nullptr;
+    builder->get_widget("gameListAbout", aboutItem);
+    aboutItem->signal_activate().connect(sigc::mem_fun(*this, &GameList::on_about_click));
+
     builder->get_widget("gameTree", treeView);
     treeView->signal_row_activated().connect(sigc::mem_fun(*this, &GameList::on_gamelist_row_activated));
     
@@ -79,4 +83,11 @@ bool GameList::on_gamelist_delete_event(GdkEventAny* event)
 {
     // Do not allow closing the window
     return true;
+}
+
+void GameList::on_about_click()
+{
+    Gtk::AboutDialog* aboutDialog = nullptr;
+    builder->get_widget("aboutWindow", aboutDialog);
+    aboutDialog->run();
 }

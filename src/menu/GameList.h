@@ -34,6 +34,7 @@ public:
     void on_gamelist_row_activated(const Gtk::TreePath& treePath, Gtk::TreeViewColumn* const& column);
     bool on_gamelist_delete_event(GdkEventAny* event);
     void on_dumpWindow_closed();
+    void on_about_click();
 
     Gtk::Window* getWindow() { return gameListWindow; }
 private:

@@ -28,6 +28,7 @@ public:
 
     void on_chooseHddOkButton_clicked();
     void on_chooseHddRefreshButton_clicked();
+    void on_about_click();
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;

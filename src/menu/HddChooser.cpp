@@ -10,6 +10,10 @@ HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
 
     builder->get_widget("chooseHddWindow", chooseHddWindow);
 
+    Gtk::ImageMenuItem* aboutItem = nullptr;
+    builder->get_widget("hddChooserAbout", aboutItem);
+    aboutItem->signal_activate().connect(sigc::mem_fun(*this, &HddChooser::on_about_click));
+
     Gtk::Button* button = nullptr;
     builder->get_widget("chooseHddOkButton", button);
     button->signal_clicked().connect(sigc::mem_fun(*this, &HddChooser::on_chooseHddOkButton_clicked));
@@ -115,4 +119,11 @@ void HddChooser::on_chooseHddRefreshButton_clicked()
         if (i == 0)
             hdds->set_active(row);
     }
+}
+
+void HddChooser::on_about_click()
+{
+    Gtk::AboutDialog* aboutDialog = nullptr;
+    builder->get_widget("aboutWindow", aboutDialog);
+    aboutDialog->run();
 }
