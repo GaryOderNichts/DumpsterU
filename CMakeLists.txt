@@ -42,11 +42,14 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++17")
 endif()
 
-#set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+if (MINGW)
+    set(WINDOWS_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/wfstools.rc")
+endif()
 
 add_executable(${CMAKE_PROJECT_NAME}
                 ${SOURCES}
-                ${RESOURCE_FILE})
+                ${RESOURCE_FILE}
+                ${WINDOWS_RESOURCE})
 if (MINGW)
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${GTKMM_LIBRARIES}
