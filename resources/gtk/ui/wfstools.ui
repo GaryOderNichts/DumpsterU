@@ -8,7 +8,7 @@
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">wfstools</property>
-    <property name="version">beta 2</property>
+    <property name="version">beta 3</property>
     <property name="copyright" translatable="yes">© 2020 GaryOderNichts: wfstools
 © 2017 koolkdev: wfslib</property>
     <property name="website">https://github.com/GaryOderNichts/wfstools</property>
