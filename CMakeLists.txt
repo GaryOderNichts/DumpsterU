@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(wfstools)
+project(DumpsterU)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
 
@@ -12,7 +12,7 @@ pkg_check_modules(LIBXML libxml++-3.0)
 
 include(GResource)
 gresource(${CMAKE_CURRENT_SOURCE_DIR}/resources/gtk
-            wfstools.resources.xml
+            dumpsteru.resources.xml
             ${CMAKE_CURRENT_SOURCE_DIR}/src/gtk
             RESOURCE_FILE)
 
@@ -43,7 +43,7 @@ else()
 endif()
 
 if (MINGW)
-    set(WINDOWS_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/wfstools.rc")
+    set(WINDOWS_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/windows/dumpsteru.rc")
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME}

@@ -7,13 +7,13 @@
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
-    <property name="program_name">wfstools</property>
+    <property name="program_name">DumpsterU</property>
     <property name="version">beta 3</property>
-    <property name="copyright" translatable="yes">© 2020 GaryOderNichts: wfstools
+    <property name="copyright" translatable="yes">© 2020 GaryOderNichts: DumpsterU
 © 2017 koolkdev: wfslib</property>
-    <property name="website">https://github.com/GaryOderNichts/wfstools</property>
+    <property name="website">https://github.com/GaryOderNichts/DumpsterU</property>
     <property name="website_label" translatable="yes">Github</property>
-    <property name="authors">GarOderNichts - wfstools
+    <property name="authors">GarOderNichts - DumpsterU
 koolkdev - wfslib</property>
     <property name="logo_icon_name">image-missing</property>
     <property name="license_type">gpl-2-0</property>
