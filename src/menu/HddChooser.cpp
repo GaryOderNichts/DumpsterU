@@ -71,9 +71,10 @@ void HddChooser::on_chooseHddOkButton_clicked()
     }
 
     std::vector<uint8_t> key = seeprom->GetUSBKey(*otp);
-    std::shared_ptr<FileDevice>  device = std::make_shared<FileDevice>(disk.deviceId);
+    std::shared_ptr<FileDevice> device = nullptr;
     try
     {
+        device = std::make_shared<FileDevice>(disk.deviceId);
         Wfs::DetectDeviceSectorSizeAndCount(device, key);
     }
     catch(const std::exception& e)
@@ -82,6 +83,10 @@ void HddChooser::on_chooseHddOkButton_clicked()
         if (std::string(e.what()).compare("Unexpected WFS version (bad key?)") == 0)
         {
             errDialog.set_secondary_text("Not a WFS Device or bad key");
+        }
+        else if(std::string(e.what()).compare("FileDevice: Failed to open file") == 0)
+        {
+            errDialog.set_secondary_text("Cannot open disk");
         }
         else
         {
