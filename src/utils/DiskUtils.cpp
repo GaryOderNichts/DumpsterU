@@ -46,14 +46,6 @@ std::vector<DiskUtils::Disk> DiskUtils::getDisks()
 
         VARIANT vtProp;
 
-        hr = pclsObj->Get(L"Partitions", 0, &vtProp, 0, 0);
-        if (vtProp.uintVal != 0) // Wii U Drives show up without any partitions
-        {
-            continue;
-            VariantClear(&vtProp);
-        }
-        VariantClear(&vtProp);
-
         hr = pclsObj->Get(L"DeviceID", 0, &vtProp, 0, 0);
         std::wstring ws(vtProp.bstrVal);
         disk.deviceId = converter.to_bytes(ws);
@@ -71,7 +63,7 @@ std::vector<DiskUtils::Disk> DiskUtils::getDisks()
         hr = pclsObj->Get(L"Size", 0, &vtProp, 0, 0);
         ws = std::wstring(vtProp.bstrVal);
         uint64_t size = std::stoull(converter.to_bytes(ws));
-        disk.size = std::to_string((int) (size / 1000 / 1000 / 1000)) + " GiB";
+        disk.size = std::to_string((int) (size / 1000 / 1000 / 1000)) + " GB";
         VariantClear(&vtProp);
 
         disks.push_back(disk);
