@@ -118,7 +118,22 @@ void HddChooser::on_chooseHddRefreshButton_clicked()
 
 void HddChooser::on_about_click()
 {
-    Gtk::AboutDialog* aboutDialog = nullptr;
     builder->get_widget("aboutWindow", aboutDialog);
-    aboutDialog->run();
+
+#ifdef _WIN32
+    Gtk::ButtonBox* aboutButtonBox = nullptr;
+    builder->get_widget("aboutButtonBox", aboutButtonBox);
+
+    std::vector<Gtk::Widget*> children = aboutButtonBox->get_children();
+    Gtk::Button* closeButton = (Gtk::Button*) (children[1]);
+    aboutConn = closeButton->signal_clicked().connect(sigc::mem_fun(*this, &HddChooser::on_aboutClose_click));
+#endif
+
+    aboutDialog->show();
+}
+
+void HddChooser::on_aboutClose_click()
+{
+    aboutDialog->hide();
+    aboutConn.disconnect();
 }

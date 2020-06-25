@@ -32,6 +32,7 @@ public:
     void on_chooseHddOkButton_clicked();
     void on_chooseHddRefreshButton_clicked();
     void on_about_click();
+    void on_aboutClose_click();
 
 private:
     Glib::RefPtr<Gtk::Builder> builder;
@@ -47,4 +48,7 @@ private:
     Gtk::FileChooserButton* seepromButton = nullptr;
 
     GameList* list = nullptr;
+
+    Gtk::AboutDialog* aboutDialog = nullptr;
+    sigc::connection aboutConn;
 };

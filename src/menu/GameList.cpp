@@ -87,7 +87,22 @@ bool GameList::on_gamelist_delete_event(GdkEventAny* event)
 
 void GameList::on_about_click()
 {
-    Gtk::AboutDialog* aboutDialog = nullptr;
     builder->get_widget("aboutWindow", aboutDialog);
-    aboutDialog->run();
+
+#ifdef _WIN32
+    Gtk::ButtonBox* aboutButtonBox = nullptr;
+    builder->get_widget("aboutButtonBox", aboutButtonBox);
+
+    std::vector<Gtk::Widget*> children = aboutButtonBox->get_children();
+    Gtk::Button* closeButton = (Gtk::Button*) (children[1]);
+    aboutConn = closeButton->signal_clicked().connect(sigc::mem_fun(*this, &GameList::on_aboutClose_click));
+#endif
+
+    aboutDialog->show();
+}
+
+void GameList::on_aboutClose_click()
+{
+    aboutDialog->hide();
+    aboutConn.disconnect();
 }

@@ -35,6 +35,7 @@ public:
     bool on_gamelist_delete_event(GdkEventAny* event);
     void on_dumpWindow_closed();
     void on_about_click();
+    void on_aboutClose_click();
 
     Gtk::Window* getWindow() { return gameListWindow; }
 private:
@@ -50,4 +51,7 @@ private:
     DumpWindow* dumpWindow = nullptr;
     sigc::connection dumpWindowConn;
     sigc::connection deleteConn;
+
+    Gtk::AboutDialog* aboutDialog = nullptr;
+    sigc::connection aboutConn;
 };
