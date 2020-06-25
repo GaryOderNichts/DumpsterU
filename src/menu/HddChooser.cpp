@@ -121,11 +121,7 @@ void HddChooser::on_about_click()
     builder->get_widget("aboutWindow", aboutDialog);
 
 #ifdef _WIN32
-    Gtk::ButtonBox* aboutButtonBox = nullptr;
-    builder->get_widget("aboutButtonBox", aboutButtonBox);
-
-    std::vector<Gtk::Widget*> children = aboutButtonBox->get_children();
-    Gtk::Button* closeButton = (Gtk::Button*) (children[1]);
+    Gtk::Button* closeButton = (Gtk::Button*) aboutDialog->get_widget_for_response(GTK_RESPONSE_DELETE_EVENT);
     aboutConn = closeButton->signal_clicked().connect(sigc::mem_fun(*this, &HddChooser::on_aboutClose_click));
 #endif
 
