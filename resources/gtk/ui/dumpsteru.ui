@@ -8,7 +8,7 @@
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">DumpsterU</property>
-    <property name="version">beta 3</property>
+    <property name="version">beta 4</property>
     <property name="copyright" translatable="yes">© 2020 GaryOderNichts: DumpsterU
 © 2017 koolkdev: wfslib</property>
     <property name="website">https://github.com/GaryOderNichts/DumpsterU</property>
