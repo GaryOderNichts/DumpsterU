@@ -41,12 +41,18 @@ GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::
 
     treeView->append_column("TitleID", columns.titleId);
     treeView->get_column(1)->set_min_width(140);
+    treeView->get_column(1)->set_sort_column(columns.titleId);
 
     treeView->append_column("Name", columns.name);
     treeView->get_column(2)->set_min_width(512);
+    treeView->get_column(2)->set_sort_column(columns.name);
 
     // Search for name
     treeView->set_search_column(3);
+
+    // Sort by name by default
+    treeModel->set_sort_column(GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID, Gtk::SortType::SORT_ASCENDING);
+    treeModel->set_sort_column(3, Gtk::SortType::SORT_ASCENDING);
 }
 
 GameList::~GameList()

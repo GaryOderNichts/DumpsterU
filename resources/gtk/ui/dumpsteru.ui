@@ -265,6 +265,7 @@ koolkdev - wfslib</property>
         </child>
         <child>
           <object class="GtkScrolledWindow">
+            <property name="width_request">716</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="hscrollbar_policy">never</property>
