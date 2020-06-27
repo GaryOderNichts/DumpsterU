@@ -1,0 +1,34 @@
+name: C/C++ CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install
+        run: |
+          sudo apt-get install cmake build-essential libboost-all-dev libcrypto++-dev libgtkmm-3.0-dev g++-9
+          wget http://ftp.gnome.org/pub/GNOME/sources/libxml++/3.0/libxml++-3.0.1.tar.xz -O /tmp/libxml++-3.0.1.tar.xz
+          tar -xf /tmp/libxml++-3.0.1.tar.xz -C /tmp
+          cd /tmp/libxml++-3.0.1
+          ./configure
+          make
+          sudo make install
+          
+      - name: Clean
+        run: |
+          rm -rf ${{ runner.workspace }}/build
+          
+      - name: Build
+        uses: ashutoshvarma/action-cmake-build@master
+        with:
+          build-dir: ${{ runner.workspace }}/build
+          # will set the CC & CXX for cmake
+          cc: gcc
+          cxx: g++-9
+          build-type: Release
+          # Extra options pass to cmake while configuring project
+          parallel: 2
