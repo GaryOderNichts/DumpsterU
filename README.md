@@ -1,5 +1,5 @@
 
-![banner](https://i.imgur.com/x5hcGzV.png)
+![banner](https://i.imgur.com/5E2pCry.png)
 ![C/C++ CI](https://github.com/GaryOderNichts/DumpsterU/workflows/C/C++%20CI/badge.svg)
 # DumpsterU - Wii U Harddrive Dumper  
 DumpsterU makes it really easy to dump your installed contents with very high speeds.  
