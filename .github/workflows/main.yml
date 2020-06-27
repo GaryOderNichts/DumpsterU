@@ -28,7 +28,7 @@ jobs:
           build-dir: ${{ runner.workspace }}/build
           # will set the CC & CXX for cmake
           cc: gcc
-          cxx: g++
+          cxx: g++-9
           build-type: Release
           # Extra options pass to cmake while configuring project
           parallel: 2
