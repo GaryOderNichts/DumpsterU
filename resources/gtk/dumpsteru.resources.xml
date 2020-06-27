@@ -4,5 +4,15 @@
     <file>ui/custom.css</file>
     <file preprocess="xml-stripblanks">ui/dumpsteru.ui</file>
     <file>ui/icon-256px.png</file>
+
+    <file>icons/16.png</file>
+    <file>icons/24.png</file>
+    <file>icons/32.png</file>
+    <file>icons/48.png</file>
+    <file>icons/64.png</file>
+    <file>icons/96.png</file>
+    <file>icons/128.png</file>
+    <file>icons/192.png</file>
+    <file>icons/256.png</file>
   </gresource>
 </gresources>

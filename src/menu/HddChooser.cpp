@@ -1,6 +1,7 @@
 #include "HddChooser.h"
 
 #include "utils/TitleParser.h"
+#include "utils/IconParser.h"
 #include <string>
 
 HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
@@ -8,6 +9,7 @@ HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
     this->builder = builder;
 
     builder->get_widget("chooseHddWindow", chooseHddWindow);
+    chooseHddWindow->set_default_icon_list(IconParser::getIcons());
 
     Gtk::ImageMenuItem* aboutItem = nullptr;
     builder->get_widget("hddChooserAbout", aboutItem);
