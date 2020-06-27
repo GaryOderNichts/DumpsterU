@@ -10,7 +10,7 @@ jobs:
 
       - name: Install
         run: |
-          sudo apt-get install cmake build-essential libboost-all-dev libcrypto++-dev libgtkmm-3.0-dev
+          sudo apt-get install cmake build-essential libboost-all-dev libcrypto++-dev libgtkmm-3.0-dev g++-9
           wget http://ftp.gnome.org/pub/GNOME/sources/libxml++/3.0/libxml++-3.0.1.tar.xz -O /tmp/libxml++-3.0.1.tar.xz
           tar -xf /tmp/libxml++-3.0.1.tar.xz -C /tmp
           cd /tmp/libxml++-3.0.1
