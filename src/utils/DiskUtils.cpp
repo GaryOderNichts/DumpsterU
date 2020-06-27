@@ -65,24 +65,34 @@ std::vector<DiskUtils::Disk> DiskUtils::getDisks()
         VARIANT vtProp;
 
         hr = pclsObj->Get(L"DeviceID", 0, &vtProp, 0, 0);
-        std::wstring ws(vtProp.bstrVal);
-        disk.deviceId = converter.to_bytes(ws);
-        VariantClear(&vtProp);
+        if (vtProp.bstrVal)
+        {
+            std::wstring ws(vtProp.bstrVal);
+            disk.deviceId = converter.to_bytes(ws);
+            VariantClear(&vtProp);
+        }
 
         hr = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
-        ws = std::wstring(vtProp.bstrVal);
-        disk.name = converter.to_bytes(ws).substr(0, 20);
-        VariantClear(&vtProp);
+        if (vtProp.bstrVal)
+        {
+            std::wstring ws(vtProp.bstrVal);
+            disk.name = converter.to_bytes(ws).substr(0, 20);
+            VariantClear(&vtProp);
+        }
+
         if (disk.name.empty())
         {
             disk.name = disk.deviceId;
         }
 
         hr = pclsObj->Get(L"Size", 0, &vtProp, 0, 0);
-        ws = std::wstring(vtProp.bstrVal);
-        uint64_t size = std::stoull(converter.to_bytes(ws));
-        disk.size = std::to_string((int) (size / 1000 / 1000 / 1000)) + " GB";
-        VariantClear(&vtProp);
+        if (vtProp.bstrVal)
+        {
+            std::wstring ws(vtProp.bstrVal);
+            uint64_t size = std::stoull(converter.to_bytes(ws));
+            disk.size = std::to_string((int) (size / 1000 / 1000 / 1000)) + " GB";
+            VariantClear(&vtProp);
+        }
 
         disks.push_back(disk);
 
