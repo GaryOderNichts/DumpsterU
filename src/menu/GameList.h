@@ -38,6 +38,9 @@ public:
     void on_aboutClose_click();
 
     Gtk::Window* getWindow() { return gameListWindow; }
+
+    bool on_search_equal(const Glib::RefPtr<Gtk::TreeModel>& model, int column, const Glib::ustring& key, const Gtk::TreeModel::iterator& iter);
+
 private:
     Gtk::Window* gameListWindow = nullptr;
     Glib::RefPtr<Gtk::Builder> builder;

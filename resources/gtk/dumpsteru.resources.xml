@@ -3,5 +3,6 @@
   <gresource prefix="/dumpsteru/">
     <file>ui/custom.css</file>
     <file preprocess="xml-stripblanks">ui/dumpsteru.ui</file>
+    <file>ui/icon-256px.png</file>
   </gresource>
 </gresources>

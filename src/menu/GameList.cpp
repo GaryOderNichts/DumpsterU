@@ -41,12 +41,20 @@ GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::
 
     treeView->append_column("TitleID", columns.titleId);
     treeView->get_column(1)->set_min_width(140);
+    treeView->get_column(1)->set_sort_column(columns.titleId);
 
     treeView->append_column("Name", columns.name);
     treeView->get_column(2)->set_min_width(512);
+    treeView->get_column(2)->set_sort_column(columns.name);
 
     // Search for name
     treeView->set_search_column(3);
+
+    // Sort by name by default
+    treeModel->set_sort_column(GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID, Gtk::SortType::SORT_ASCENDING);
+    treeModel->set_sort_column(3, Gtk::SortType::SORT_ASCENDING);
+
+    treeView->set_search_equal_func(sigc::mem_fun(*this, &GameList::on_search_equal));
 }
 
 GameList::~GameList()
@@ -101,4 +109,25 @@ void GameList::on_aboutClose_click()
 {
     aboutDialog->hide();
     aboutConn.disconnect();
+}
+
+bool GameList::on_search_equal(const Glib::RefPtr<Gtk::TreeModel>& model, int column, const Glib::ustring& key, const Gtk::TreeModel::iterator& iter)
+{
+    Gtk::TreeModel::Row row = *iter;
+
+    Glib::ustring name = row[columns.name];
+    std::string string_name(name.lowercase());
+    std::string string_key(key.lowercase());
+    if (string_name.find(string_key) != std::string::npos)
+    {
+        return false;
+    }
+
+    Glib::ustring titleId = row[columns.titleId];
+    if (std::strcmp(titleId.c_str(), key.c_str()) == 0)
+    {
+        return false;
+    }
+
+    return true;
 }
