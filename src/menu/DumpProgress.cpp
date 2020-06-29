@@ -69,56 +69,56 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
         return;
     }
 
-	if (!boost::filesystem::exists(target / path))
+    if (!boost::filesystem::exists(target / path))
     {
-		if (!boost::filesystem::create_directories(target / path))
+        if (!boost::filesystem::create_directories(target / path))
         {
-			std::cerr << "Error: Cannot create directory: " << (target / path) << "\n";
+            std::cerr << "Error: Cannot create directory: " << (target / path) << "\n";
             currentErrorCount++;
-			return;
-		}
-	}
+            return;
+        }
+    }
 
-	try 
+    try 
     {
-		for (auto item : *dir) 
+        for (auto item : *dir) 
         {
             if (stopDump)
                 break;
 
-			boost::filesystem::path npath = path / item->GetRealName();
-			if (item->IsDirectory())
+            boost::filesystem::path npath = path / item->GetRealName();
+            if (item->IsDirectory())
             {
                 dumpDirectory(target, std::dynamic_pointer_cast<Directory>(item), npath);
             }
-			else if (item->IsFile()) 
+            else if (item->IsFile()) 
             {
-				auto file = std::dynamic_pointer_cast<File>(item);
+                auto file = std::dynamic_pointer_cast<File>(item);
 
-				std::ofstream output_file((target / npath).string(), std::ios::binary | std::ios::out);
+                std::ofstream output_file((target / npath).string(), std::ios::binary | std::ios::out);
 
-				size_t size = file->GetSize();
+                size_t size = file->GetSize();
                 size_t to_read = size;
                 currentTotalFileSize = size;
 
-				File::stream stream(file);
-				std::vector<char> data(0x2000);
+                File::stream stream(file);
+                std::vector<char> data(0x2000);
 
                 currentFileName = file->GetRealName();
 
                 bool err = false;
-				while (to_read > 0) 
+                while (to_read > 0) 
                 {
-					stream.read(&*data.begin(), std::min(data.size(), to_read));
-					auto read = stream.gcount();
-					if (read <= 0) 
+                    stream.read(&*data.begin(), std::min(data.size(), to_read));
+                    auto read = stream.gcount();
+                    if (read <= 0) 
                     {
-						std::cerr << "Error: Failed to read " << npath << "\n";
+                        std::cerr << "Error: Failed to read " << npath << "\n";
                         err = true;
-						break;
-					}
-					output_file.write((char*)&*data.begin(), read);
-					to_read -= static_cast<size_t>(read);
+                        break;
+                    }
+                    output_file.write((char*)&*data.begin(), read);
+                    to_read -= static_cast<size_t>(read);
 
                     currentFileSize = size - to_read;
 
@@ -128,7 +128,7 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
                         std::remove((target / npath).string().c_str());
                         break;
                     }
-				}
+                }
 
                 currentFileCount++;
                 if (err)
@@ -136,15 +136,15 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
                     currentErrorCount++;
                 }
 
-				output_file.close();
-			}
-		}
-	}
-	catch (Block::BadHash&) 
+                output_file.close();
+            }
+        }
+    }
+    catch (Block::BadHash&) 
     {
-		std::cerr << "Error: Failed to dump folder " << path << "\n";
+        std::cerr << "Error: Failed to dump folder " << path << "\n";
         currentErrorCount++;
-	}
+    }
 }
 
 void DumpProgress::countFiles(const std::shared_ptr<Directory>& dir)
