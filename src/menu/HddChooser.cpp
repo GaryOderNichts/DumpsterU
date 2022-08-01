@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -29,11 +29,11 @@ HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
     builder->get_widget("chooseHddWindow", chooseHddWindow);
     chooseHddWindow->set_default_icon_list(IconParser::getIcons());
 
-    Gtk::ImageMenuItem* aboutItem = nullptr;
+    Gtk::ImageMenuItem *aboutItem = nullptr;
     builder->get_widget("hddChooserAbout", aboutItem);
     aboutItem->signal_activate().connect(sigc::mem_fun(*this, &HddChooser::on_about_click));
 
-    Gtk::Button* button = nullptr;
+    Gtk::Button *button = nullptr;
     builder->get_widget("chooseHddOkButton", button);
     button->signal_clicked().connect(sigc::mem_fun(*this, &HddChooser::on_chooseHddOkButton_clicked));
 
@@ -48,7 +48,7 @@ HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
     hdds->pack_start(columns.name);
     hdds->pack_start(columns.size);
 
-    Gtk::Button* refreshButton = nullptr;
+    Gtk::Button *refreshButton = nullptr;
     builder->get_widget("chooseHddRefreshButton", refreshButton);
     refreshButton->signal_clicked().connect(sigc::mem_fun(*this, &HddChooser::on_chooseHddRefreshButton_clicked));
 
@@ -59,7 +59,6 @@ HddChooser::HddChooser(Glib::RefPtr<Gtk::Builder> builder)
 
 HddChooser::~HddChooser()
 {
-
 }
 
 void HddChooser::on_chooseHddOkButton_clicked()
@@ -82,7 +81,7 @@ void HddChooser::on_chooseHddOkButton_clicked()
         otp.reset(OTP::LoadFromFile(otpPath));
         seeprom.reset(SEEPROM::LoadFromFile(seepromPath));
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         Gtk::MessageDialog errDialog(*chooseHddWindow, "Error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, false);
         errDialog.set_secondary_text(e.what());
@@ -90,21 +89,21 @@ void HddChooser::on_chooseHddOkButton_clicked()
         return;
     }
 
-    std::vector<uint8_t> key = seeprom->GetUSBKey(*otp);
+    std::vector<std::byte> key = seeprom->GetUSBKey(*otp);
     std::shared_ptr<FileDevice> device = nullptr;
     try
     {
         device = std::make_shared<FileDevice>(disk.deviceId);
         Wfs::DetectDeviceSectorSizeAndCount(device, key);
     }
-    catch(const std::exception& e)
-    {   
+    catch (const std::exception &e)
+    {
         Gtk::MessageDialog errDialog(*chooseHddWindow, "Error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, false);
         if (std::string(e.what()).compare("Unexpected WFS version (bad key?)") == 0)
         {
             errDialog.set_secondary_text("Not a WFS Device or bad key");
         }
-        else if(std::string(e.what()).compare("FileDevice: Failed to open file") == 0)
+        else if (std::string(e.what()).compare("FileDevice: Failed to open file") == 0)
         {
             errDialog.set_secondary_text("Cannot open disk");
         }
@@ -146,7 +145,7 @@ void HddChooser::on_about_click()
     builder->get_widget("aboutWindow", aboutDialog);
 
 #ifdef _WIN32
-    Gtk::Button* closeButton = (Gtk::Button*) aboutDialog->get_widget_for_response(GTK_RESPONSE_DELETE_EVENT);
+    Gtk::Button *closeButton = (Gtk::Button *)aboutDialog->get_widget_for_response(GTK_RESPONSE_DELETE_EVENT);
     aboutConn = closeButton->signal_clicked().connect(sigc::mem_fun(*this, &HddChooser::on_aboutClose_click));
 #endif
 

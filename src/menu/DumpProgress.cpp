@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -21,7 +21,7 @@
 #include <thread>
 #include <boost/format.hpp>
 
-DumpProgress::DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+DumpProgress::DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key)
 {
     this->device = device;
     this->key = key;
@@ -62,7 +62,7 @@ DumpProgress::~DumpProgress()
     }
 }
 
-void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const std::shared_ptr<Directory>& dir, const boost::filesystem::path& path)
+void DumpProgress::dumpDirectory(const boost::filesystem::path &target, const std::shared_ptr<Directory> &dir, const boost::filesystem::path &path)
 {
     if (stopDump)
     {
@@ -79,9 +79,9 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
         }
     }
 
-    try 
+    try
     {
-        for (auto item : *dir) 
+        for (auto item : *dir)
         {
             if (stopDump)
                 break;
@@ -91,13 +91,13 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
             {
                 dumpDirectory(target, std::dynamic_pointer_cast<Directory>(item), npath);
             }
-            else if (item->IsFile()) 
+            else if (item->IsFile())
             {
                 auto file = std::dynamic_pointer_cast<File>(item);
 
                 std::ofstream output_file((target / npath).string(), std::ios::binary | std::ios::out);
 
-                size_t size = file->GetSize();
+                size_t size = file->Size();
                 size_t to_read = size;
                 currentTotalFileSize = size;
 
@@ -107,17 +107,17 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
                 currentFileName = file->GetRealName();
 
                 bool err = false;
-                while (to_read > 0) 
+                while (to_read > 0)
                 {
                     stream.read(&*data.begin(), std::min(data.size(), to_read));
                     auto read = stream.gcount();
-                    if (read <= 0) 
+                    if (read <= 0)
                     {
                         std::cerr << "Error: Failed to read " << npath << "\n";
                         err = true;
                         break;
                     }
-                    output_file.write((char*)&*data.begin(), read);
+                    output_file.write((char *)&*data.begin(), read);
                     to_read -= static_cast<size_t>(read);
 
                     currentFileSize = size - to_read;
@@ -140,19 +140,19 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
             }
         }
     }
-    catch (Block::BadHash&) 
+    catch (Block::BadHash &)
     {
         std::cerr << "Error: Failed to dump folder " << path << "\n";
         currentErrorCount++;
     }
 }
 
-void DumpProgress::countFiles(const std::shared_ptr<Directory>& dir)
+void DumpProgress::countFiles(const std::shared_ptr<Directory> &dir)
 {
     if (!dir)
         return;
 
-    for (auto item : *dir) 
+    for (auto item : *dir)
     {
         if (item->IsDirectory())
         {
@@ -167,12 +167,12 @@ void DumpProgress::countFiles(const std::shared_ptr<Directory>& dir)
 
 bool DumpProgress::updateProgress()
 {
-    progressBar->set_fraction((double) currentFileCount / totalFileCount);
+    progressBar->set_fraction((double)currentFileCount / totalFileCount);
     progressBar->set_text(std::to_string(currentFileCount) + std::string(" / ") + std::to_string(totalFileCount));
 
     currentDumpFile->set_text(std::string("Dumping ") + currentFileName.substr(0, 34) + std::string("..."));
 
-    if (currentFileSize >  1024 * 1024 * 5) // Display in mb if larger than 5mb
+    if (currentFileSize > 1024 * 1024 * 5) // Display in mb if larger than 5mb
     {
         progressSize->set_text(boost::str(boost::format("%.2f") % (currentFileSize / 1024 / 1024)) + std::string(" / ") + boost::str(boost::format("%.2f") % (currentTotalFileSize / 1024 / 1024)) + std::string(" MB"));
     }
@@ -208,15 +208,15 @@ bool DumpProgress::updateProgress()
             finishedLabel->set_text(std::string("Dump cancelled"));
             finishedLabel->set_visible();
         }
-        
+
         buttonOk->set_sensitive();
         buttonCancel->set_sensitive(false);
     }
 
-    return !dumpDone;//(currentFileCount / totalFileCount) > 0.99;
+    return !dumpDone; //(currentFileCount / totalFileCount) > 0.99;
 }
 
-void DumpProgress::startDump(const std::string& dumpPath, const std::string& outputPath)
+void DumpProgress::startDump(const std::string &dumpPath, const std::string &outputPath)
 {
     std::thread t(&DumpProgress::dumpThreadFunction, this, dumpPath, outputPath);
     t.detach();
@@ -229,11 +229,11 @@ void DumpProgress::cancelDump()
     cancelMutex.unlock();
 }
 
-void DumpProgress::dumpThreadFunction(const std::string& dumpPath, const std::string& outputPath)
+void DumpProgress::dumpThreadFunction(const std::string &dumpPath, const std::string &outputPath)
 {
     rawOutputPath = outputPath;
 
-    std::shared_ptr<Directory> dir = Wfs(device, key).GetDirectory(dumpPath);
+    std::shared_ptr<Directory> dir = Wfs(device, std::span(key)).GetDirectory(dumpPath);
     if (dir)
     {
         countFiles(dir);

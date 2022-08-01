@@ -1,0 +1,10 @@
+{
+  "name": "wfslib",
+  "version-string": "0.1.0-dev",
+  "dependencies": [
+    "boost-endian",
+    "boost-format",
+    "boost-iostreams",
+    "cryptopp"
+  ]
+}

@@ -31,16 +31,6 @@ The 14GB from Breath of the Wild were dumped in 1:40 minutes. This depends on ha
 <b>Ubuntu</b>
 ![screenshot_ubuntu](https://i.imgur.com/HLENggc.png "Screenshot on Ubuntu")
 
-## Installation
-<b>Windows</b>  
-Run the installer
-
-<b>Ubuntu</b>
-Run from commandline:
-```
-sudo ./DumpsterU
-```
-
 ## Credits
 <b>GaryOderNichts</b>: DumpsterU  
 <b>koolkdev</b>: [wfslib](https://github.com/koolkdev/wfslib)  

@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -21,7 +21,7 @@
 #include <gtkmm.h>
 #include <string>
 #include <vector>
-#include "wfslib/WfsLib.h"
+#include "include/wfslib/wfslib.h"
 
 #include "DumpWindow.h"
 #include "utils/TitleParser.h"
@@ -46,33 +46,33 @@ public:
         Gtk::TreeModelColumn<Glib::ustring> name;
     };
 
-    GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
+    GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo> &infos, const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key);
     ~GameList();
 
-    void on_gamelist_row_activated(const Gtk::TreePath& treePath, Gtk::TreeViewColumn* const& column);
-    bool on_gamelist_delete_event(GdkEventAny* event);
+    void on_gamelist_row_activated(const Gtk::TreePath &treePath, Gtk::TreeViewColumn *const &column);
+    bool on_gamelist_delete_event(GdkEventAny *event);
     void on_dumpWindow_closed();
     void on_about_click();
     void on_aboutClose_click();
 
-    Gtk::Window* getWindow() { return gameListWindow; }
+    Gtk::Window *getWindow() { return gameListWindow; }
 
-    bool on_search_equal(const Glib::RefPtr<Gtk::TreeModel>& model, int column, const Glib::ustring& key, const Gtk::TreeModel::iterator& iter);
+    bool on_search_equal(const Glib::RefPtr<Gtk::TreeModel> &model, int column, const Glib::ustring &key, const Gtk::TreeModel::iterator &iter);
 
 private:
-    Gtk::Window* gameListWindow = nullptr;
+    Gtk::Window *gameListWindow = nullptr;
     Glib::RefPtr<Gtk::Builder> builder;
-    std::vector<uint8_t> key;
+    std::vector<std::byte> key;
     std::shared_ptr<FileDevice> device = nullptr;
 
-    Gtk::TreeView* treeView = nullptr;
+    Gtk::TreeView *treeView = nullptr;
     ModelColumns columns;
     std::vector<TitleParser::TitleInfo> infos;
 
-    DumpWindow* dumpWindow = nullptr;
+    DumpWindow *dumpWindow = nullptr;
     sigc::connection dumpWindowConn;
     sigc::connection deleteConn;
 
-    Gtk::AboutDialog* aboutDialog = nullptr;
+    Gtk::AboutDialog *aboutDialog = nullptr;
     sigc::connection aboutConn;
 };

@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -18,10 +18,10 @@
 
 #include "GameList.h"
 
-#include "wfslib/WfsLib.h"
+#include "include/wfslib/wfslib.h"
 #include <iostream>
 
-GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo> &infos, const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key)
 {
     this->builder = builder;
     this->device = device;
@@ -31,13 +31,13 @@ GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::
     builder->get_widget("gameListWindow", gameListWindow);
     gameListWindow->show();
 
-    Gtk::ImageMenuItem* aboutItem = nullptr;
+    Gtk::ImageMenuItem *aboutItem = nullptr;
     builder->get_widget("gameListAbout", aboutItem);
     aboutItem->signal_activate().connect(sigc::mem_fun(*this, &GameList::on_about_click));
 
     builder->get_widget("gameTree", treeView);
     treeView->signal_row_activated().connect(sigc::mem_fun(*this, &GameList::on_gamelist_row_activated));
-    
+
     Glib::RefPtr<Gtk::ListStore> treeModel = Gtk::ListStore::create(columns);
     treeView->set_model(treeModel);
 
@@ -80,7 +80,7 @@ GameList::~GameList()
     delete dumpWindow;
 }
 
-void GameList::on_gamelist_row_activated(const Gtk::TreePath& treePath, Gtk::TreeViewColumn* const& column)
+void GameList::on_gamelist_row_activated(const Gtk::TreePath &treePath, Gtk::TreeViewColumn *const &column)
 {
     Glib::RefPtr<Gtk::TreeSelection> selection = treeView->get_selection();
     Gtk::TreeModel::Row row = *selection->get_selected();
@@ -105,7 +105,7 @@ void GameList::on_dumpWindow_closed()
     gameListWindow->set_sensitive(true);
 }
 
-bool GameList::on_gamelist_delete_event(GdkEventAny* event)
+bool GameList::on_gamelist_delete_event(GdkEventAny *event)
 {
     // Do not allow closing the window
     return true;
@@ -116,7 +116,7 @@ void GameList::on_about_click()
     builder->get_widget("aboutWindow", aboutDialog);
 
 #ifdef _WIN32
-    Gtk::Button* closeButton = (Gtk::Button*) aboutDialog->get_widget_for_response(GTK_RESPONSE_DELETE_EVENT);
+    Gtk::Button *closeButton = (Gtk::Button *)aboutDialog->get_widget_for_response(GTK_RESPONSE_DELETE_EVENT);
     aboutConn = closeButton->signal_clicked().connect(sigc::mem_fun(*this, &GameList::on_aboutClose_click));
 #endif
 
@@ -129,7 +129,7 @@ void GameList::on_aboutClose_click()
     aboutConn.disconnect();
 }
 
-bool GameList::on_search_equal(const Glib::RefPtr<Gtk::TreeModel>& model, int column, const Glib::ustring& key, const Gtk::TreeModel::iterator& iter)
+bool GameList::on_search_equal(const Glib::RefPtr<Gtk::TreeModel> &model, int column, const Glib::ustring &key, const Gtk::TreeModel::iterator &iter)
 {
     Gtk::TreeModel::Row row = *iter;
 
