@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <string>
-#include "wfslib/WfsLib.h"
+#include "include/wfslib/wfslib.h"
 #include <gtkmm.h>
 #include <boost/filesystem.hpp>
 #include <map>
@@ -29,33 +29,33 @@
 class DumpProgress
 {
 public:
-    DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
+    DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key);
     ~DumpProgress();
 
-    void startDump(const std::string& dumpPath, const std::string& outputPath);
+    void startDump(const std::string &dumpPath, const std::string &outputPath);
     void cancelDump();
 
-    Gtk::Window* getWindow() { return dumpProgressWindow; }
+    Gtk::Window *getWindow() { return dumpProgressWindow; }
     bool getDumpDone() { return dumpDone; }
 
     bool updateProgress();
 
 private:
-    void dumpDirectory(const boost::filesystem::path& target, const std::shared_ptr<Directory>& dir, const boost::filesystem::path& path);
-    void countFiles(const std::shared_ptr<Directory>& dir);
-    void dumpThreadFunction(const std::string& dumpPath, const std::string& outputPath);
+    void dumpDirectory(const boost::filesystem::path &target, const std::shared_ptr<Directory> &dir, const boost::filesystem::path &path);
+    void countFiles(const std::shared_ptr<Directory> &dir);
+    void dumpThreadFunction(const std::string &dumpPath, const std::string &outputPath);
 
-    Gtk::Window* dumpProgressWindow = nullptr;
-    Gtk::ProgressBar* progressBar = nullptr;
-    Gtk::Label* currentDumpFile = nullptr;
-    Gtk::Label* progressSize = nullptr;
-    Gtk::Label* finishedLabel = nullptr;
-    Gtk::Label* errorLabel = nullptr;
-    Gtk::Button* buttonOk = nullptr;
-    Gtk::Button* buttonCancel = nullptr;
+    Gtk::Window *dumpProgressWindow = nullptr;
+    Gtk::ProgressBar *progressBar = nullptr;
+    Gtk::Label *currentDumpFile = nullptr;
+    Gtk::Label *progressSize = nullptr;
+    Gtk::Label *finishedLabel = nullptr;
+    Gtk::Label *errorLabel = nullptr;
+    Gtk::Button *buttonOk = nullptr;
+    Gtk::Button *buttonCancel = nullptr;
 
     std::shared_ptr<FileDevice> device;
-    std::vector<uint8_t> key;
+    std::vector<std::byte> key;
 
     int totalFileCount = 0;
     int currentFileCount = 0;

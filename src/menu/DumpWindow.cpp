@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -20,7 +20,7 @@
 
 #include <boost/filesystem.hpp>
 
-DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::TitleInfo& info, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::TitleInfo &info, const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key)
 {
     this->builder = builder;
     this->device = device;
@@ -29,28 +29,28 @@ DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::Ti
     builder->get_widget("dumpWindow", dumpWindow);
     dumpWindow->show();
 
-    Gtk::Image* iconImage = nullptr;
+    Gtk::Image *iconImage = nullptr;
     builder->get_widget("dumpIcon", iconImage);
     iconImage->set(info.icon);
 
-    Gtk::Label* name = nullptr;
+    Gtk::Label *name = nullptr;
     builder->get_widget("dumpTitle", name);
     name->set_text(info.name);
 
-    Gtk::Fixed* fixed = nullptr;
+    Gtk::Fixed *fixed = nullptr;
     builder->get_widget("dumpWindowFixed", fixed);
-    
+
     builder->get_widget("dumpOutputDir", outputChooser);
 
-    Gtk::Button* dumpGameButton = nullptr;
+    Gtk::Button *dumpGameButton = nullptr;
     builder->get_widget("dumpGameButton", dumpGameButton);
     connections.push_back(dumpGameButton->signal_clicked().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpGameButton_click)));
 
-    Gtk::Button* dumpUpdateButton = nullptr;
+    Gtk::Button *dumpUpdateButton = nullptr;
     builder->get_widget("dumpUpdateButton", dumpUpdateButton);
     connections.push_back(dumpUpdateButton->signal_clicked().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpUpdateButton_click)));
 
-    Gtk::Button* dumpDlcButton = nullptr;
+    Gtk::Button *dumpDlcButton = nullptr;
     builder->get_widget("dumpDLCButton", dumpDlcButton);
     connections.push_back(dumpDlcButton->signal_clicked().connect(sigc::mem_fun(*this, &DumpWindow::on_dumpDlcButton_click)));
 
@@ -60,7 +60,7 @@ DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::Ti
     treeView->set_search_column(-1);
     connections.push_back(treeView->signal_row_activated().connect(sigc::mem_fun(*this, &DumpWindow::on_savelist_row_activated)));
 
-    Gtk::Label* versionLabel = nullptr;
+    Gtk::Label *versionLabel = nullptr;
     builder->get_widget("dumpWindowVersionLabel", versionLabel);
 
     additionalInfo = TitleParser::getAdditionalInfo(info.titleId, device, key);
@@ -111,7 +111,7 @@ DumpWindow::~DumpWindow()
     delete progressWindow;
 }
 
-void DumpWindow::on_savelist_row_activated(const Gtk::TreePath& treePath, Gtk::TreeViewColumn* const& column)
+void DumpWindow::on_savelist_row_activated(const Gtk::TreePath &treePath, Gtk::TreeViewColumn *const &column)
 {
     Glib::RefPtr<Gtk::TreeSelection> selection = treeView->get_selection();
     Gtk::TreeModel::Row row = *selection->get_selected();
@@ -194,8 +194,10 @@ void DumpWindow::on_dumpDlcButton_click()
 void DumpWindow::on_progressWindow_closed()
 {
     progressWindow->cancelDump();
-    while (!progressWindow->getDumpDone()) { }
-    
+    while (!progressWindow->getDumpDone())
+    {
+    }
+
     dumpWindowDeleteConn.disconnect();
     progressWindowConn.disconnect();
 
@@ -207,7 +209,7 @@ void DumpWindow::on_progressWindow_closed()
     dumpWindow->set_sensitive(true);
 }
 
-bool DumpWindow::on_dumpWindow_delete_event(GdkEventAny* event)
+bool DumpWindow::on_dumpWindow_delete_event(GdkEventAny *event)
 {
     // do not allow closing the window
     return true;

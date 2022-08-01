@@ -1,4 +1,4 @@
-/**    
+/**
  *  Copyright (C) 2020 GaryOderNichts
  *  This file is part of DumpsterU <https://github.com/GaryOderNichts/DumpsterU>
  *
@@ -22,7 +22,7 @@
 #include <vector>
 #include <map>
 #include <gtkmm.h>
-#include "wfslib/WfsLib.h"
+#include "include/wfslib/wfslib.h"
 
 class TitleParser
 {
@@ -33,7 +33,7 @@ public:
         std::string titleId;
         Glib::RefPtr<Gdk::Pixbuf> icon;
     };
-    
+
     struct AdditionalInfo
     {
         std::string gamePath;
@@ -45,14 +45,14 @@ public:
         std::string shortTid;
     };
 
-    static std::vector<TitleParser::TitleInfo> getTitleInfos(const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
-    static TitleParser::AdditionalInfo getAdditionalInfo(const std::string& titleId, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
+    static std::vector<TitleParser::TitleInfo> getTitleInfos(const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key);
+    static TitleParser::AdditionalInfo getAdditionalInfo(const std::string &titleId, const std::shared_ptr<FileDevice> &device, std::vector<std::byte> &key);
 
 private:
     static const unsigned int pathsSize = 2;
-    static constexpr const char* titlePaths[] = 
-    {
-        "/usr/title/00050000",
-        "/usr/title/00050002",
+    static constexpr const char *titlePaths[] =
+        {
+            "/usr/title/00050000",
+            "/usr/title/00050002",
     };
 };
