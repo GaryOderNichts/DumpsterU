@@ -64,16 +64,11 @@ if (MINGW)
 else()
     target_link_libraries(${CMAKE_PROJECT_NAME}
         ${GTKMM_LIBRARIES}
+        ${LIBXML_LIBRARIES}
         wfslib
-        libxml++-3.0.a
-        libxml2.a
-        z
-        lzma
-        icuuc
-        dl
-        libcrypto++.a
-        libboost_system.a
-        libboost_filesystem.a
+        cryptopp
+        boost_system
+        boost_filesystem
         pthread
     )
 endif()
