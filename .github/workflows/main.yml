@@ -6,29 +6,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          submodules: "true"
 
       - name: Install
         run: |
-          sudo apt-get install cmake build-essential libboost-system-dev libboost-filesystem-dev libcrypto++-dev libgtkmm-3.0-dev g++-9 liblzma-dev
+          sudo apt-get install cmake build-essential libboost-system-dev libboost-filesystem-dev libcrypto++-dev libgtkmm-3.0-dev g++-13 liblzma-dev
           wget http://ftp.gnome.org/pub/GNOME/sources/libxml++/3.0/libxml++-3.0.1.tar.xz -O /tmp/libxml++-3.0.1.tar.xz
           tar -xf /tmp/libxml++-3.0.1.tar.xz -C /tmp
           cd /tmp/libxml++-3.0.1
-          ./configure --enable-static
+          ./configure --disable-shared --enable-static
           make
           sudo make install
-          
-      - name: Clean
+
+      - name: Get cmake
+        uses: lukka/get-cmake@latest
+
+      - name: Set compiler
         run: |
-          rm -rf ${{ runner.workspace }}/build
-          
-      - name: Build
-        uses: ashutoshvarma/action-cmake-build@master
+          echo "CC=gcc-13" >> $GITHUB_ENV
+          echo "CXX=g++-13" >> $GITHUB_ENV
+
+      - name: Run cmake
+        uses: lukka/run-cmake@v10
         with:
-          build-dir: ${{ runner.workspace }}/build
-          # will set the CC & CXX for cmake
-          cc: gcc
-          cxx: g++-9
-          build-type: Release
-          # Extra options pass to cmake while configuring project
-          parallel: 2
+          configurePreset: "ninja"
+          buildPreset: "ninja"
