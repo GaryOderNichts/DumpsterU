@@ -19,9 +19,11 @@
 #include "DumpProgress.h"
 
 #include <thread>
+#include <iostream>
+#include <fstream>
 #include <boost/format.hpp>
 
-DumpProgress::DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+DumpProgress::DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key)
 {
     this->device = device;
     this->key = key;
@@ -81,12 +83,14 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
 
     try 
     {
-        for (auto item : *dir) 
+        for (auto [name, item_or_error] : *dir) 
         {
             if (stopDump)
                 break;
 
-            boost::filesystem::path npath = path / item->GetRealName();
+            boost::filesystem::path npath = path / name;
+
+            auto item = throw_if_error(item_or_error);
             if (item->IsDirectory())
             {
                 dumpDirectory(target, std::dynamic_pointer_cast<Directory>(item), npath);
@@ -97,14 +101,14 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
 
                 std::ofstream output_file((target / npath).string(), std::ios::binary | std::ios::out);
 
-                size_t size = file->GetSize();
+                size_t size = file->Size();
                 size_t to_read = size;
                 currentTotalFileSize = size;
 
                 File::stream stream(file);
                 std::vector<char> data(0x2000);
 
-                currentFileName = file->GetRealName();
+                currentFileName = name;
 
                 bool err = false;
                 while (to_read > 0) 
@@ -140,9 +144,10 @@ void DumpProgress::dumpDirectory(const boost::filesystem::path& target, const st
             }
         }
     }
-    catch (Block::BadHash&) 
+    catch (const WfsException& e) 
     {
-        std::cerr << "Error: Failed to dump folder " << path << "\n";
+        std::cerr << "Error: Failed to dump folder " << path << "\n"
+            << e.what() << std::endl;
         currentErrorCount++;
     }
 }
@@ -152,8 +157,13 @@ void DumpProgress::countFiles(const std::shared_ptr<Directory>& dir)
     if (!dir)
         return;
 
-    for (auto item : *dir) 
+    for (auto [name, item_or_error] : *dir) 
     {
+        if (!item_or_error.has_value()) {
+            continue;
+        }
+
+        auto item = *item_or_error;
         if (item->IsDirectory())
         {
             countFiles(std::dynamic_pointer_cast<Directory>(item));

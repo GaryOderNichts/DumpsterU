@@ -21,7 +21,7 @@
 #include <gtkmm.h>
 #include <string>
 #include <vector>
-#include "wfslib/WfsLib.h"
+#include "wfslib/wfslib.h"
 
 #include "DumpWindow.h"
 #include "utils/TitleParser.h"
@@ -46,7 +46,7 @@ public:
         Gtk::TreeModelColumn<Glib::ustring> name;
     };
 
-    GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
+    GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key);
     ~GameList();
 
     void on_gamelist_row_activated(const Gtk::TreePath& treePath, Gtk::TreeViewColumn* const& column);
@@ -62,7 +62,7 @@ public:
 private:
     Gtk::Window* gameListWindow = nullptr;
     Glib::RefPtr<Gtk::Builder> builder;
-    std::vector<uint8_t> key;
+    std::vector<std::byte> key;
     std::shared_ptr<FileDevice> device = nullptr;
 
     Gtk::TreeView* treeView = nullptr;

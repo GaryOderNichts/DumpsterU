@@ -19,7 +19,7 @@
 #pragma once
 
 #include <string>
-#include "wfslib/WfsLib.h"
+#include "wfslib/wfslib.h"
 #include <gtkmm.h>
 #include <boost/filesystem.hpp>
 #include <map>
@@ -29,7 +29,7 @@
 class DumpProgress
 {
 public:
-    DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
+    DumpProgress(Glib::RefPtr<Gtk::Builder> builder, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key);
     ~DumpProgress();
 
     void startDump(const std::string& dumpPath, const std::string& outputPath);
@@ -55,7 +55,7 @@ private:
     Gtk::Button* buttonCancel = nullptr;
 
     std::shared_ptr<FileDevice> device;
-    std::vector<uint8_t> key;
+    std::vector<std::byte> key;
 
     int totalFileCount = 0;
     int currentFileCount = 0;

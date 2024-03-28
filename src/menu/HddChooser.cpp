@@ -90,27 +90,39 @@ void HddChooser::on_chooseHddOkButton_clicked()
         return;
     }
 
-    std::vector<uint8_t> key = seeprom->GetUSBKey(*otp);
+    std::vector<std::byte> key = seeprom->GetUSBKey(*otp);
+
     std::shared_ptr<FileDevice> device = nullptr;
     try
     {
         device = std::make_shared<FileDevice>(disk.deviceId);
-        Wfs::DetectDeviceSectorSizeAndCount(device, key);
     }
-    catch(const std::exception& e)
-    {   
+    catch (const std::exception& e)
+    {
         Gtk::MessageDialog errDialog(*chooseHddWindow, "Error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, false);
-        if (std::string(e.what()).compare("Unexpected WFS version (bad key?)") == 0)
-        {
-            errDialog.set_secondary_text("Not a WFS Device or bad key");
-        }
-        else if(std::string(e.what()).compare("FileDevice: Failed to open file") == 0)
+        if (std::string(e.what()).compare("FileDevice: Failed to open file") == 0)
         {
             errDialog.set_secondary_text("Cannot open disk");
         }
         else
         {
             errDialog.set_secondary_text(e.what());
+        }
+        errDialog.run();
+        return;
+    }
+
+    auto detection_result = Recovery::DetectDeviceParams(device, key);
+    if (detection_result.has_value())
+    {
+        Gtk::MessageDialog errDialog(*chooseHddWindow, "Error", false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, false);
+        if (detection_result == WfsError::kInvalidWfsVersion)
+        {
+            errDialog.set_secondary_text("Not a WFS Device or bad key");
+        }
+        else
+        {
+            errDialog.set_secondary_text(WfsException(*detection_result).what());
         }
         errDialog.run();
         return;

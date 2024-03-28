@@ -22,81 +22,99 @@
 #include <boost/algorithm/string.hpp>
 #include <libxml++/libxml++.h>
 
-std::vector<TitleParser::TitleInfo> TitleParser::getTitleInfos(const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+std::vector<TitleParser::TitleInfo> TitleParser::getTitleInfos(const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key)
 {
     std::vector<TitleParser::TitleInfo> infos;
 
     for (unsigned int i = 0; i < pathsSize; i++)
     {
-        std::shared_ptr<Directory> dir = Wfs(device, key).GetDirectory(titlePaths[i]);
+        std::shared_ptr<Directory> dir = nullptr;
+        try
+        {
+            dir = Wfs(device, key).GetDirectory(titlePaths[i]);
+        }
+        catch(const WfsException& e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            continue;
+        }
+
         if (dir)
         {
-            for (auto item : *dir) 
+            for (auto [name, item_or_error] : *dir) 
             {
-                if (item->IsDirectory())
+                try
                 {
-                    boost::filesystem::path npath = boost::filesystem::path(titlePaths[i]) / item->GetRealName();
-                    std::shared_ptr<Directory> titleDir = Wfs(device, key).GetDirectory(npath.string());
-                    std::shared_ptr<Directory> metaDir = titleDir->GetDirectory("meta");
-                    if (metaDir && metaDir->GetItemsCount() > 0)
+                    auto item = throw_if_error(item_or_error);
+                    if (item->IsDirectory())
                     {
-                        TitleInfo info;
-                        info.name = "";
-                        info.titleId = "";
-
-                        std::shared_ptr<File> metaFile = metaDir->GetFile("meta.xml");
-                        if (metaFile)
+                        boost::filesystem::path npath = boost::filesystem::path(titlePaths[i]) / name;
+                        std::shared_ptr<Directory> titleDir = Wfs(device, key).GetDirectory(npath.string());
+                        std::shared_ptr<Directory> metaDir = throw_if_error(titleDir->GetDirectory("meta"));
+                        if (metaDir)
                         {
-                            size_t size = metaFile->GetSize();
-                            if (size > 0)
+                            TitleInfo info;
+                            info.name = "";
+                            info.titleId = "";
+
+                            std::shared_ptr<File> metaFile = throw_if_error(metaDir->GetFile("meta.xml"));
+                            if (metaFile)
                             {
-                                File::stream stream(metaFile);
-                                xmlpp::DomParser parser;
-                                parser.parse_stream(stream);
-
-                                xmlpp::Node* rootNode = parser.get_document()->get_root_node();
-
-                                xmlpp::Node::NodeSet nameResult = rootNode->find("longname_en");
-                                if (nameResult.size() > 0)
+                                size_t size = metaFile->Size();
+                                if (size > 0)
                                 {
-                                    xmlpp::Element* longname = (xmlpp::Element*) nameResult.at(0);
-                                    info.name = longname->get_first_child_text()->get_content();
-                                }
+                                    File::stream stream(metaFile);
+                                    xmlpp::DomParser parser;
+                                    parser.parse_stream(stream);
 
-                                xmlpp::Node::NodeSet titleIdResult = rootNode->find("title_id");
-                                if (titleIdResult.size() > 0)
-                                {
-                                    xmlpp::Element* titleId = (xmlpp::Element*) titleIdResult.at(0);
-                                    info.titleId = titleId->get_first_child_text()->get_content();
-                                }
+                                    xmlpp::Node* rootNode = parser.get_document()->get_root_node();
 
+                                    xmlpp::Node::NodeSet nameResult = rootNode->find("longname_en");
+                                    if (nameResult.size() > 0)
+                                    {
+                                        xmlpp::Element* longname = (xmlpp::Element*) nameResult.at(0);
+                                        info.name = longname->get_first_child_text()->get_content();
+                                    }
+
+                                    xmlpp::Node::NodeSet titleIdResult = rootNode->find("title_id");
+                                    if (titleIdResult.size() > 0)
+                                    {
+                                        xmlpp::Element* titleId = (xmlpp::Element*) titleIdResult.at(0);
+                                        info.titleId = titleId->get_first_child_text()->get_content();
+                                    }
+
+                                }
                             }
-                        }
 
-                        std::shared_ptr<File> iconFile = metaDir->GetFile("icontex.tga");
-                        if (iconFile)
-                        {
-                            size_t size = iconFile->GetSize();
-                            if (size > 0)
+                            std::shared_ptr<File> iconFile = throw_if_error(metaDir->GetFile("icontex.tga"));
+                            if (iconFile)
                             {
-                                File::stream stream(iconFile);
-                                void* data = malloc(size);
-                                stream.read((char*) data, size);
+                                size_t size = iconFile->Size();
+                                if (size > 0)
+                                {
+                                    File::stream stream(iconFile);
+                                    void* data = malloc(size);
+                                    stream.read((char*) data, size);
 
-                                Glib::RefPtr<Gio::MemoryInputStream> gstream = Gio::MemoryInputStream::create();
-                                gstream->add_data(data, size);
-                                info.icon = Gdk::Pixbuf::create_from_stream_at_scale(gstream, 72, 72, false); // 72x72 is the highest resolution we ever need in this application
+                                    Glib::RefPtr<Gio::MemoryInputStream> gstream = Gio::MemoryInputStream::create();
+                                    gstream->add_data(data, size);
+                                    info.icon = Gdk::Pixbuf::create_from_stream_at_scale(gstream, 72, 72, false); // 72x72 is the highest resolution we ever need in this application
 
-                                free(data);
+                                    free(data);
+                                }
                             }
+                            else
+                            {
+                                std::cerr << "Cannot get icon " << npath << " \n";
+                            }
+                            
+                            infos.push_back(info);
                         }
-                        else
-                        {
-                            std::cerr << "Cannot get icon " << npath << " \n";
-                        }
-                        
-                        infos.push_back(info);
                     }
+                }
+                catch(const WfsException& e)
+                {
+                    std::cerr << "Error: " << e.what() << std::endl;
                 }
             }
         }
@@ -105,7 +123,7 @@ std::vector<TitleParser::TitleInfo> TitleParser::getTitleInfos(const std::shared
     return infos;
 }
 
-TitleParser::AdditionalInfo TitleParser::getAdditionalInfo(const std::string& titleId, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+TitleParser::AdditionalInfo TitleParser::getAdditionalInfo(const std::string& titleId, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key)
 {
     AdditionalInfo info;
     info.gamePath = std::string("/usr/title/") + boost::algorithm::to_lower_copy(titleId.substr(0, 8)) + std::string("/") + boost::algorithm::to_lower_copy(titleId.substr(8, 8));
@@ -114,58 +132,67 @@ TitleParser::AdditionalInfo TitleParser::getAdditionalInfo(const std::string& ti
     info.updateVersion = "";
     info.shortTid = titleId.substr(8, 16);
 
-    boost::filesystem::path dlcPath = boost::filesystem::path("/usr/title/0005000c") / boost::algorithm::to_lower_copy(titleId.substr(8, 8));
-    std::shared_ptr<Directory> dlcDir = Wfs(device, key).GetDirectory(dlcPath.string());
-    if (dlcDir && dlcDir->GetItemsCount() > 0)
+    try
     {
-        info.dlcPath = dlcPath.string();
-    }
-
-    boost::filesystem::path updatePath = boost::filesystem::path("/usr/title/0005000e") / boost::algorithm::to_lower_copy(titleId.substr(8, 8));
-    std::shared_ptr<Directory> updateDir = Wfs(device, key).GetDirectory(updatePath.string());
-    if (updateDir && updateDir->GetItemsCount() > 0)
-    {
-        info.updatePath = updatePath.string();
-
-        std::shared_ptr<Directory> metaDir = updateDir->GetDirectory("meta");
-        if (metaDir && metaDir->GetItemsCount() > 0)
+        boost::filesystem::path dlcPath = boost::filesystem::path("/usr/title/0005000c") / boost::algorithm::to_lower_copy(titleId.substr(8, 8));
+        std::shared_ptr<Directory> dlcDir = Wfs(device, key).GetDirectory(dlcPath.string());
+        if (dlcDir)
         {
-            std::shared_ptr<File> metaFile = metaDir->GetFile("meta.xml");
-            if (metaFile)
+            info.dlcPath = dlcPath.string();
+        }
+
+        boost::filesystem::path updatePath = boost::filesystem::path("/usr/title/0005000e") / boost::algorithm::to_lower_copy(titleId.substr(8, 8));
+        std::shared_ptr<Directory> updateDir = Wfs(device, key).GetDirectory(updatePath.string());
+        if (updateDir)
+        {
+            info.updatePath = updatePath.string();
+
+            std::shared_ptr<Directory> metaDir = throw_if_error(updateDir->GetDirectory("meta"));
+            if (metaDir)
             {
-                size_t size = metaFile->GetSize();
-                if (size > 0)
+                std::shared_ptr<File> metaFile = throw_if_error(metaDir->GetFile("meta.xml"));
+                if (metaFile)
                 {
-                    File::stream stream(metaFile);
-                    xmlpp::DomParser parser;
-                    parser.parse_stream(stream);
-
-                    xmlpp::Node* rootNode = parser.get_document()->get_root_node();
-
-                    xmlpp::Node::NodeSet versionResult = rootNode->find("title_version");
-                    if (versionResult.size() > 0)
+                    size_t size = metaFile->Size();
+                    if (size > 0)
                     {
-                        xmlpp::Element* version = (xmlpp::Element*) versionResult.at(0);
-                        info.updateVersion = version->get_first_child_text()->get_content();
+                        File::stream stream(metaFile);
+                        xmlpp::DomParser parser;
+                        parser.parse_stream(stream);
+
+                        xmlpp::Node* rootNode = parser.get_document()->get_root_node();
+
+                        xmlpp::Node::NodeSet versionResult = rootNode->find("title_version");
+                        if (versionResult.size() > 0)
+                        {
+                            xmlpp::Element* version = (xmlpp::Element*) versionResult.at(0);
+                            info.updateVersion = version->get_first_child_text()->get_content();
+                        }
                     }
                 }
             }
         }
-    }
 
-    std::vector<std::string> users;
-    boost::filesystem::path savePath = boost::filesystem::path("/usr/save/00050000") / boost::filesystem::path(boost::algorithm::to_lower_copy(titleId.substr(8, 8))) / "user";
-    std::shared_ptr<Directory> saveDir = Wfs(device, key).GetDirectory(savePath.string());
-    if (saveDir)
-    {
-        info.savePath = savePath.string();
-
-        for (auto item : *saveDir) 
+        std::vector<std::string> users;
+        boost::filesystem::path savePath = boost::filesystem::path("/usr/save/00050000") / boost::filesystem::path(boost::algorithm::to_lower_copy(titleId.substr(8, 8))) / "user";
+        std::shared_ptr<Directory> saveDir = Wfs(device, key).GetDirectory(savePath.string());
+        if (saveDir)
         {
-            users.push_back(item->GetRealName());
+            info.savePath = savePath.string();
+
+            for (auto [name, item_or_error] : *saveDir) 
+            {
+                if (item_or_error.has_value()) {
+                    users.push_back(name);
+                }
+            }
         }
+        info.users = users;
     }
-    info.users = users;
+    catch(const WfsException& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
 
     return info;
 }

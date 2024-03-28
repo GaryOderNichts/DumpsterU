@@ -20,7 +20,7 @@
 
 #include <boost/filesystem.hpp>
 
-DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::TitleInfo& info, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+DumpWindow::DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::TitleInfo& info, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key)
 {
     this->builder = builder;
     this->device = device;

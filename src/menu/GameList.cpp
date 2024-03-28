@@ -18,10 +18,10 @@
 
 #include "GameList.h"
 
-#include "wfslib/WfsLib.h"
+#include "wfslib/wfslib.h"
 #include <iostream>
 
-GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key)
+GameList::GameList(Glib::RefPtr<Gtk::Builder> builder, std::vector<TitleParser::TitleInfo>& infos, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key)
 {
     this->builder = builder;
     this->device = device;

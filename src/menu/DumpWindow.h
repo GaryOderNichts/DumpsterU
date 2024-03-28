@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "wfslib/WfsLib.h"
+#include "wfslib/wfslib.h"
 #include "utils/TitleParser.h"
 #include <vector>
 
@@ -40,7 +40,7 @@ public:
         Gtk::TreeModelColumn<Glib::ustring> user;
     };
 
-    DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::TitleInfo& info, const std::shared_ptr<FileDevice>& device, std::vector<uint8_t>& key);
+    DumpWindow(Glib::RefPtr<Gtk::Builder> builder, const TitleParser::TitleInfo& info, const std::shared_ptr<FileDevice>& device, std::vector<std::byte>& key);
     ~DumpWindow();
 
     void on_button_folder_clicked();
@@ -57,7 +57,7 @@ public:
 private:
     Glib::RefPtr<Gtk::Builder> builder;
     std::shared_ptr<FileDevice> device;
-    std::vector<uint8_t> key;
+    std::vector<std::byte> key;
 
     Gtk::Window* dumpWindow = nullptr;
 
