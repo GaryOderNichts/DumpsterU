@@ -64,25 +64,32 @@ std::vector<TitleParser::TitleInfo> TitleParser::getTitleInfos(const std::shared
                                 if (size > 0)
                                 {
                                     File::stream stream(metaFile);
-                                    xmlpp::DomParser parser;
-                                    parser.parse_stream(stream);
 
-                                    xmlpp::Node* rootNode = parser.get_document()->get_root_node();
-
-                                    xmlpp::Node::NodeSet nameResult = rootNode->find("longname_en");
-                                    if (nameResult.size() > 0)
+                                    try
                                     {
-                                        xmlpp::Element* longname = (xmlpp::Element*) nameResult.at(0);
-                                        info.name = longname->get_first_child_text()->get_content();
-                                    }
+                                        xmlpp::DomParser parser;
+                                        parser.parse_stream(stream);
 
-                                    xmlpp::Node::NodeSet titleIdResult = rootNode->find("title_id");
-                                    if (titleIdResult.size() > 0)
+                                        xmlpp::Node* rootNode = parser.get_document()->get_root_node();
+
+                                        xmlpp::Node::NodeSet nameResult = rootNode->find("longname_en");
+                                        if (nameResult.size() > 0)
+                                        {
+                                            xmlpp::Element* longname = (xmlpp::Element*) nameResult.at(0);
+                                            info.name = longname->get_first_child_text()->get_content();
+                                        }
+
+                                        xmlpp::Node::NodeSet titleIdResult = rootNode->find("title_id");
+                                        if (titleIdResult.size() > 0)
+                                        {
+                                            xmlpp::Element* titleId = (xmlpp::Element*) titleIdResult.at(0);
+                                            info.titleId = titleId->get_first_child_text()->get_content();
+                                        }
+                                    }
+                                    catch (const std::exception& e)
                                     {
-                                        xmlpp::Element* titleId = (xmlpp::Element*) titleIdResult.at(0);
-                                        info.titleId = titleId->get_first_child_text()->get_content();
+                                        std::cerr << "Error: " << e.what() << std::endl;
                                     }
-
                                 }
                             }
 
@@ -157,16 +164,24 @@ TitleParser::AdditionalInfo TitleParser::getAdditionalInfo(const std::string& ti
                     if (size > 0)
                     {
                         File::stream stream(metaFile);
-                        xmlpp::DomParser parser;
-                        parser.parse_stream(stream);
 
-                        xmlpp::Node* rootNode = parser.get_document()->get_root_node();
-
-                        xmlpp::Node::NodeSet versionResult = rootNode->find("title_version");
-                        if (versionResult.size() > 0)
+                        try
                         {
-                            xmlpp::Element* version = (xmlpp::Element*) versionResult.at(0);
-                            info.updateVersion = version->get_first_child_text()->get_content();
+                            xmlpp::DomParser parser;
+                            parser.parse_stream(stream);
+
+                            xmlpp::Node* rootNode = parser.get_document()->get_root_node();
+
+                            xmlpp::Node::NodeSet versionResult = rootNode->find("title_version");
+                            if (versionResult.size() > 0)
+                            {
+                                xmlpp::Element* version = (xmlpp::Element*) versionResult.at(0);
+                                info.updateVersion = version->get_first_child_text()->get_content();
+                            }
+                        }
+                        catch (const std::exception& e)
+                        {
+                            std::cerr << "Error: " << e.what() << std::endl;
                         }
                     }
                 }
